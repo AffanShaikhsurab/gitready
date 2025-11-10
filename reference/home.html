@@ -1,0 +1,270 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Portfolio Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --border-color: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #7d8590;
+            --link-color: #58a6ff;
+            --green-color: #238636;
+            --green-hover-color: #2ea043;
+            --input-bg: #010409;
+            --button-bg: #21262d;
+            --button-hover-bg: #30363d;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        /* --- HEADER --- */
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            padding: 24px;
+        }
+        .header .logo { font-weight: 700; font-size: 20px; color: var(--text-primary); margin-right: 16px; }
+        .header nav a { color: var(--text-secondary); text-decoration: none; font-weight: 500; margin: 0 12px; transition: color 0.2s ease; }
+        .header nav a:hover { color: var(--text-primary); }
+        .header .source-link {
+            margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--text-primary);
+            text-decoration: none; padding: 8px 16px; border: 1px solid var(--border-color);
+            border-radius: 8px; background-color: var(--button-bg); transition: all 0.2s ease;
+        }
+        .header .source-link:hover { background-color: var(--button-hover-bg); border-color: #8b949e; }
+        
+        /* --- MAIN CONTENT --- */
+        .hero-container {
+            text-align: center; max-width: 680px; width: 100%;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        h1 {
+            font-size: 48px; font-weight: 800; line-height: 1.2;
+            margin-bottom: 16px; color: var(--text-primary);
+        }
+        .hero-container .subtitle {
+            font-size: 18px; color: var(--text-secondary); max-width: 580px;
+            line-height: 1.6; margin-bottom: 40px;
+        }
+        .hero-container .subtitle strong { color: var(--text-primary); font-weight: 600; }
+
+        /* --- FORM --- */
+        .analysis-form { width: 100%; display: flex; flex-direction: column; gap: 16px; }
+        .input-group { display: flex; gap: 16px; flex-wrap: wrap; }
+        .input-wrapper { position: relative; flex-grow: 1; }
+        
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-align: left;
+        }
+
+        .form-input, .form-select {
+            width: 100%; background-color: var(--input-bg); border: 1px solid var(--border-color);
+            border-radius: 6px; padding: 12px 16px; font-size: 16px;
+            color: var(--text-primary); transition: all 0.2s ease-out;
+        }
+        .form-input:hover, .form-select:hover {
+             border-color: #8b949e;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none; border-color: var(--link-color);
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
+        }
+        .form-select {
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%237d8590'%3e%3cpath d='M4.427 7.427l3.396 3.396a.25.25 0 00.354 0l3.396-3.396A.25.25 0 0011.396 7H4.604a.25.25 0 00-.177.427z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;
+        }
+        
+        .analyze-button {
+            position: relative; overflow: hidden;
+            padding: 14px 24px; font-size: 16px; font-weight: 600; color: #fff;
+            background-color: var(--green-color); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px; cursor: pointer; transition: background-color 0.2s ease;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .analyze-button:hover { background-color: var(--green-hover-color); }
+        .analyze-button .button-text, .analyze-button .button-loader { transition: opacity 0.3s ease, transform 0.3s ease; }
+        .analyze-button.loading .button-text { opacity: 0; transform: translateY(-10px); }
+        .analyze-button .button-loader {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, 10px);
+            opacity: 0; display: flex; align-items: center; gap: 8px; font-style: italic;
+        }
+        .analyze-button.loading .button-loader { opacity: 1; transform: translate(-50%, -50%); }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { animation: spin 1s linear infinite; }
+
+        .disclaimer { font-size: 13px; color: var(--text-secondary); margin-top: 16px; }
+
+        /* --- TOOLTIP --- */
+        .tooltip-trigger {
+            cursor: help; border-bottom: 1px dotted var(--text-secondary);
+        }
+        .info-icon {
+            position: relative; display: inline-block;
+        }
+        .info-icon .tooltip-text {
+            visibility: hidden; width: 220px; background-color: var(--button-bg); color: var(--text-primary);
+            text-align: center; border-radius: 6px; padding: 8px; position: absolute;
+            z-index: 1; bottom: 150%; left: 50%; margin-left: -110px;
+            opacity: 0; transition: opacity 0.3s; border: 1px solid var(--border-color);
+        }
+        .info-icon .tooltip-text::after {
+            content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px;
+            border-width: 5px; border-style: solid; border-color: var(--border-color) transparent transparent transparent;
+        }
+        .info-icon:hover .tooltip-text { visibility: visible; opacity: 1; }
+        
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            h1 { font-size: 36px; }
+            .hero-container .subtitle { font-size: 16px; }
+            .input-group { flex-direction: column; }
+            .header {
+                position: static; flex-direction: column; align-items: flex-start;
+                gap: 16px; padding-bottom: 24px; margin-bottom: 24px;
+                border-bottom: 1px solid var(--border-color);
+            }
+            .header .source-link { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo">GA</div>
+        <nav>
+            <a href="#">About</a>
+            <a href="#">How It Works</a>
+        </nav>
+        <a href="#" class="source-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
+            Source
+        </a>
+    </header>
+    
+    <main class="hero-container">
+        <h1>Is your GitHub portfolio optimized?</h1>
+        <p class="subtitle">
+            See your profile through an employer's eyes. Our AI will analyze your commits, repos, and activity against <strong>real job specs</strong> to find where you shine, and what to build next.
+        </p>
+        
+        <form class="analysis-form" id="analyzeForm">
+            <div class="input-group">
+                <div style="flex-grow: 2; min-width: 250px;">
+                    <label class="form-label" for="username">GitHub Username</label>
+                    <input type="text" id="username" class="form-input" placeholder="the-primeagen">
+                </div>
+                <div style="flex-grow: 1;">
+                    <label class="form-label" for="role">Target Role</label>
+                    <select id="role" class="form-select">
+                        <option>Frontend</option>
+                        <option>Backend</option>
+                        <option>Fullstack</option>
+                        <option>DevOps</option>
+                        <option>Data Science</option>
+                    </select>
+                </div>
+                <div style="flex-grow: 1;">
+                    <label class="form-label" for="seniority">
+                        Seniority
+                        <span class="info-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.064.293.006.399.287.47l.45.082.082-.38-2.29-.287a.5.5 0 0 1-.497-.534l.738-3.468a.5.5 0 0 1 .497-.469l2.29.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg>
+                            <span class="tooltip-text">Be honest! This helps us match you to the right kind of job requirements.</span>
+                        </span>
+                    </label>
+                    <select id="seniority" class="form-select">
+                        <option>Junior</option>
+                        <option>Mid-level</option>
+                        <option>Senior</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="analyze-button" id="submitButton">
+                <span class="button-text">
+                    Run `git blame` on my career &rarr;
+                </span>
+                <span class="button-loader" id="loaderText">
+                    <svg class="spinner" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.534 7.06c-.446-1.542-1.698-2.793-3.24-3.24l-.239-1.202a.5.5 0 0 0-.99.198l.24 1.202C5.748 4.706 4.496 5.958 4.05 7.5l-1.202.24a.5.5 0 0 0 .198.99l1.202-.24c.446 1.542 1.698 2.793 3.24 3.24l.239 1.202a.5.5 0 0 0 .99-.198l-.24-1.202c1.542-.447 2.793-1.699 3.24-3.24l1.202-.239a.5.5 0 0 0-.198-.99l-1.202.24zM8 10.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
+                    <span>Compiling your future...</span>
+                </span>
+            </button>
+        </form>
+        <p class="disclaimer">Don't worry, we won't judge your old PHP projects. Much.</p>
+    </main>
+    
+    <script>
+        // This is a demonstration script to show the button's loading interaction.
+        const form = document.getElementById('analyzeForm');
+        const submitButton = document.getElementById('submitButton');
+        const loaderText = document.getElementById('loaderText');
+
+        const loadingJokes = [
+            "Reticulating splines...",
+            "Asking the rubber duck...",
+            "Resolving merge conflicts in your career...",
+            "Warming up the AI hamster wheel...",
+            "Grepping for opportunities...",
+            "Asserting your dominance...",
+            "Deserializing your potential...",
+        ];
+        
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevents the form from actually submitting
+            
+            // 1. Add the 'loading' class to the button
+            submitButton.classList.add('loading');
+            submitButton.disabled = true;
+
+            // 2. Pick a random joke and update the loader text
+            const randomJoke = loadingJokes[Math.floor(Math.random() * loadingJokes.length)];
+            loaderText.querySelector('span').textContent = randomJoke;
+            
+            // 3. Simulate a network request (e.g., 3 seconds)
+            setTimeout(() => {
+                // In a real app, you would navigate to the results page here.
+                // For this demo, we'll just reset the button.
+                submitButton.classList.remove('loading');
+                submitButton.disabled = false;
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Employability Report</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --border-color: #30363d;
+            --card-bg: #161b22;
+            --text-primary: #e6edf3;
+            --text-secondary: #7d8590;
+            --link-color: #58a6ff;
+            --green-text: #3fb950;
+            --green-color: #238636;
+            --green-hover-color: #2ea043;
+            --orange-text: #d29922;
+            --purple-text: #a371f7;
+            --input-bg: #010409;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            padding: 24px;
+        }
+
+        .header {
+            width: 100%; max-width: 1200px; margin: 0 auto 32px auto;
+            display: flex; align-items: center;
+        }
+        .header .logo { font-weight: 700; font-size: 20px; margin-right: auto; }
+        .header nav a { color: var(--text-secondary); text-decoration: none; font-weight: 500; margin: 0 12px; transition: color 0.2s ease; }
+
+        /* --- View Management --- */
+        .view { transition: opacity 0.5s ease-out, transform 0.5s ease-out; }
+        .view.hidden { opacity: 0; transform: translateY(20px); position: absolute; pointer-events: none; left: 0; right: 0; }
+
+        /* --- LANDING VIEW --- */
+        #landing-view {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: calc(100vh - 120px); text-align: center;
+        }
+        .hero-container { max-width: 680px; width: 100%; animation: fadeIn 0.6s ease-out; }
+        h1 { font-size: 48px; font-weight: 800; line-height: 1.2; margin-bottom: 16px; }
+        .hero-container .subtitle { font-size: 18px; color: var(--text-secondary); max-width: 580px; line-height: 1.6; margin: 0 auto 40px auto; }
+        .hero-container .subtitle strong { color: var(--text-primary); font-weight: 600; }
+        .analysis-form { width: 100%; display: flex; flex-direction: column; gap: 16px; }
+        .input-group { display: flex; gap: 16px; flex-wrap: wrap; }
+        .input-wrapper { flex-grow: 1; }
+        .form-label { display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; text-align: left; }
+        .form-input, .form-select {
+            width: 100%; background-color: var(--input-bg); border: 1px solid var(--border-color);
+            border-radius: 6px; padding: 12px 16px; font-size: 16px; color: var(--text-primary); transition: all 0.2s ease-out;
+        }
+        .form-input:hover, .form-select:hover { border-color: #8b949e; }
+        .form-input:focus, .form-select:focus { outline: none; border-color: var(--link-color); box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3); }
+        .form-select { -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%237d8590'%3e%3cpath d='M4.427 7.427l3.396 3.396a.25.25 0 00.354 0l3.396-3.396A.25.25 0 0011.396 7H4.604a.25.25 0 00-.177.427z'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; }
+        .analyze-button {
+            position: relative; overflow: hidden; height: 50px; padding: 14px 24px; font-size: 16px; font-weight: 600; color: #fff;
+            background-color: var(--green-color); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px;
+            cursor: pointer; transition: background-color 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .analyze-button:hover { background-color: var(--green-hover-color); }
+        .analyze-button .button-text, .analyze-button .button-loader { transition: opacity 0.3s ease, transform 0.3s ease; }
+        .analyze-button.loading .button-text { opacity: 0; transform: translateY(-10px); }
+        .analyze-button .button-loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, 10px); opacity: 0; display: flex; align-items: center; gap: 8px; font-style: italic; white-space: nowrap; }
+        .analyze-button.loading .button-loader { opacity: 1; transform: translate(-50%, -50%); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { animation: spin 1s linear infinite; }
+        .info-icon { position: relative; display: inline-block; cursor: help; }
+        .info-icon .tooltip-text { visibility: hidden; width: 240px; background-color: var(--button-bg); color: var(--text-primary); text-align: center; border-radius: 6px; padding: 8px; position: absolute; z-index: 1; bottom: 150%; left: 50%; margin-left: -120px; opacity: 0; transition: opacity 0.3s; border: 1px solid var(--border-color); font-size: 12px; }
+        .info-icon:hover .tooltip-text { visibility: visible; opacity: 1; }
+
+        /* --- ANALYSIS VIEW --- */
+        .container { display: grid; grid-template-columns: 1fr 280px; gap: 32px; max-width: 1200px; margin: auto; }
+        .sidebar { animation: fadeIn 0.6s ease-out 0.2s forwards; opacity: 0; }
+        .profile-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px; text-align: center; }
+        .profile-card .avatar { width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 16px auto; }
+        .profile-card .name { font-size: 18px; font-weight: 600; }
+        .profile-card .username { font-size: 14px; color: var(--text-secondary); margin-bottom: 16px; }
+        .profile-card .stats { display: flex; justify-content: space-around; font-size: 13px; color: var(--text-secondary); }
+        .profile-card .stats strong { display: block; color: var(--text-primary); font-size: 16px; font-weight: 600; }
+        .actions-card { margin-top: 24px; background: none; border: none; }
+        .actions-card button { display: flex; align-items: center; gap: 8px; width: 100%; background: none; border: none; color: var(--text-secondary); padding: 10px; text-align: left; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; font-size: 14px; }
+        .actions-card button:hover { background-color: rgba(255,255,255,0.05); color: var(--text-primary); }
+        .main-content { animation: fadeIn 0.6s ease-out 0.1s forwards; opacity: 0; }
+        .report-header { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 32px; margin-bottom: 32px; display: flex; gap: 32px; align-items: center; }
+        .score-container .score-value { font-size: 72px; font-weight: 800; line-height: 1; background: linear-gradient(45deg, var(--green-text), var(--link-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .score-container .score-label { font-size: 16px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
+        .score-container .score-tier { font-size: 14px; font-weight: 500; color: var(--purple-text); }
+        .summary-container { border-left: 2px solid var(--border-color); padding-left: 32px; }
+        .summary-container p { font-size: 16px; color: var(--text-primary); line-height: 1.7; }
+        .summary-container strong { color: var(--green-text); }
+        .section-header { font-size: 22px; font-weight: 700; margin-bottom: 20px; }
+        .signals-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 40px; }
+        .signal-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px; }
+        .signal-card .title { font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 16px; }
+        .signal-card .bars { display: flex; gap: 3px; height: 30px; align-items: flex-end; }
+        .signal-card .bar { flex-grow: 1; background-color: var(--border-color); border-radius: 2px; opacity: 0; transform: scaleY(0); transform-origin: bottom; animation: barRaise 0.5s ease-out forwards; }
+        .signal-card .bar.filled { background: linear-gradient(180deg, var(--green-text), var(--green-color)); }
+        @keyframes barRaise { to { opacity: 1; transform: scaleY(1); } }
+        .signal-card .bar:nth-child(2) { animation-delay: 0.1s; } .signal-card .bar:nth-child(3) { animation-delay: 0.2s; } .signal-card .bar:nth-child(4) { animation-delay: 0.3s; } .signal-card .bar:nth-child(5) { animation-delay: 0.4s; }
+        .action-plan .action-item { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 24px; background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; transition: all 0.2s ease; }
+        .action-plan .action-item:hover { transform: translateY(-4px); border-color: var(--link-color); }
+        .action-item .number { font-size: 24px; font-weight: 700; color: var(--text-secondary); line-height: 1; margin-top: 4px; }
+        .action-item .content h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+        .action-item .content p { font-size: 15px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px; }
+        .action-item .content p strong { color: var(--text-primary); }
+        .action-item .details { display: flex; align-items: center; gap: 24px; }
+        .action-item .effort { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+        .action-item .action-button { display: inline-flex; align-items: center; gap: 8px; background-color: #21262d; border: 1px solid var(--border-color); color: var(--text-primary); padding: 8px 16px; font-size: 14px; font-weight: 600; border-radius: 8px; text-decoration: none; transition: all 0.2s ease; }
+        .action-item .action-button:hover { background-color: #30363d; border-color: #8b949e; }
+        
+        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .sidebar { grid-row: 1; } .report-header { flex-direction: column; text-align: center; } .summary-container { border-left: none; border-top: 2px solid var(--border-color); padding-left: 0; padding-top: 32px; } }
+        @media (max-width: 600px) { .signals-grid { grid-template-columns: 1fr; } .action-item { flex-direction: column; } }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">GA</div>
+        <nav><a href="#">How It Works</a></nav>
+    </header>
+
+    <div id="landing-view" class="view">
+        <div class="hero-container">
+            <h1>Does your GitHub pass the vibe check?</h1>
+            <p class="subtitle">Stop guessing what recruiters see. Get an AI-powered <code>git blame</code> on your entire profile to find your strengths and fix the WIPs before your next interview.</p>
+            <form class="analysis-form" id="analyzeForm">
+                <div class="input-group">
+                    <div style="flex-grow: 2; min-width: 250px;"><label class="form-label" for="username">GitHub Username</label><input type="text" id="username" class="form-input" placeholder="torvalds"></div>
+                    <div style="flex-grow: 1;"><label class="form-label" for="role">Target Role</label><select id="role" class="form-select"><option>Frontend</option><option>Backend</option><option>Fullstack</option></select></div>
+                    <div style="flex-grow: 1;"><label class="form-label" for="seniority">Seniority <span class="info-icon"><svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.064.293.006.399.287.47l.45.082.082-.38-2.29-.287a.5.5 0 0 1-.497-.534l.738-3.468a.5.5 0 0 1 .497-.469l2.29.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg><span class="tooltip-text">No judgment if you're a "Senior" with 2 YOE. We've all seen those job posts.</span></span></label><select id="seniority" class="form-select"><option>Junior</option><option>Mid-level</option><option>Senior</option></select></div>
+                </div>
+                <button type="submit" class="analyze-button" id="submitButton"><span class="button-text">Run `git blame` on my career &rarr;</span><span class="button-loader" id="loader"><svg class="spinner" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.534 7.06c-.446-1.542-1.698-2.793-3.24-3.24l-.239-1.202a.5.5 0 0 0-.99.198l.24 1.202C5.748 4.706 4.496 5.958 4.05 7.5l-1.202.24a.5.5 0 0 0 .198.99l1.202-.24c.446 1.542 1.698 2.793 3.24 3.24l.239 1.202a.5.5 0 0 0 .99-.198l-.24-1.202c1.542-.447 2.793-1.699 3.24-3.24l1.202-.239a.5.5 0 0 0-.198-.99l-1.202.24zM8 10.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg><span id="loaderText"></span></span></button>
+            </form>
+        </div>
+    </div>
+
+    <div id="analysis-view" class="view hidden">
+        <div class="container">
+            <main class="main-content">
+                <div class="report-header">
+                    <div class="score-container"><p class="score-label">Employability Score</p><div class="score-value" id="scoreValue">82</div><p class="score-tier">Strong Signal</p></div>
+                    <div class="summary-container"><p><strong>Here's the verdict:</strong> Recruiters see a developer with <strong>strong consistency</strong> and a clear talent for building. Your profile signals reliability. To go from "strong" to "irresistible," the next step is to refine how you present your best work.</p></div>
+                </div>
+                <section class="signal-strength"><h2 class="section-header">Your Signal Strength</h2><div class="signals-grid"><div class="signal-card"><h3 class="title">Consistency (The `git log` Test)</h3><div class="bars"><div class="bar filled"></div><div class="bar filled"></div><div class="bar filled"></div><div class="bar filled"></div><div class="bar filled"></div></div></div><div class="signal-card"><h3 class="title">Clarity (The README Test)</h3><div class="bars"><div class="bar filled"></div><div class="bar filled"></div><div class="bar filled"></div><div class="bar filled"></div><div class="bar"></div></div></div><div class="signal-card"><h3 class="title">Craftsmanship (Code Quality Signals)</h3><div class="bars"><div class="bar filled"></div><div class="bar filled"></div><div class="bar filled"></div><div class="bar"></div><div class="bar"></div></div></div></div></section>
+                <section class="action-plan"><h2 class="section-header">3 PRs to 3x Your Interview Rate</h2><div class="action-item"><div class="number">01</div><div class="content"><h3>Curate Your "Hero" Projects</h3><p>Your pinned repos are the <strong>first 10 seconds of your pitch</strong> to a hiring manager. You have some absolute gems that aren't pinned. Let's fix that.</p><div class="details"><span class="effort">Effort: ☕ (5 mins)</span><a href="#" class="action-button">Choose Repos to Pin &rarr;</a></div></div></div><div class="action-item"><div class="number">02</div><div class="content"><h3>Ship a README for `project-x`</h3><p>Your `project-x` repo is getting traction, but without a README, it's a black box. A simple "What/Why/How" guide shows you care about others using your code—a huge signal for senior roles.</p><div class="details"><span class="effort">Effort: ☕☕ (15 mins)</span><a href="#" class="action-button">Generate Template &rarr;</a></div></div></div><div class="action-item"><div class="number">03</div><div class="content"><h3>Standardize Your Commit Messages</h3><p>Some of your commits are "fix stuff." Adopting a convention makes your history readable and professional. It's a small detail that signals maturity and discipline.</p><div class="details"><span class="effort">Effort: 🧠 (New Habit)</span><a href="#" class="action-button">Learn the Convention &rarr;</a></div></div></div></section>
+            </main>
+            <aside class="sidebar"><div class="profile-card"><img src="https://avatars.githubusercontent.com/u/810438?v=4" alt="User Avatar" class="avatar"><h3 class="name">Dan Abramov</h3><p class="username">@gaearon</p><div class="stats"><div><strong>React</strong><span>Top Language</span></div><div><strong>140k</strong><span>Followers</span></div></div></div><div class="actions-card"><button id="startOverButton"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.534 7.06c-.446-1.542-1.698-2.793-3.24-3.24l-.239-1.202a.5.5 0 0 0-.99.198l.24 1.202C5.748 4.706 4.496 5.958 4.05 7.5l-1.202.24a.5.5 0 0 0 .198.99l1.202-.24c.446 1.542 1.698 2.793 3.24 3.24l.239 1.202a.5.5 0 0 0 .99-.198l-.24-1.202c1.542-.447 2.793-1.699 3.24-3.24l1.202-.239a.5.5 0 0 0-.198-.99l-1.202.24zM8 10.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>Start Over</button><button><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>Export Report</button></div></aside>
+        </div>
+    </div>
+    
+    <script>
+        const form = document.getElementById('analyzeForm');
+        const submitButton = document.getElementById('submitButton');
+        const loaderText = document.getElementById('loaderText');
+        const landingView = document.getElementById('landing-view');
+        const analysisView = document.getElementById('analysis-view');
+        const startOverButton = document.getElementById('startOverButton');
+        
+        let jokeInterval;
+        const loadingJokes = [
+            "Deserializing your potential...",
+            "Consulting the rubber duck...",
+            "Resolving merge conflicts in your career...",
+            "Grepping for opportunities...",
+            "Warming up the AI hamster wheel..."
+        ];
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            submitButton.classList.add('loading');
+            submitButton.disabled = true;
+
+            let jokeIndex = 0;
+            loaderText.textContent = loadingJokes[jokeIndex];
+            jokeInterval = setInterval(() => {
+                jokeIndex = (jokeIndex + 1) % loadingJokes.length;
+                loaderText.textContent = loadingJokes[jokeIndex];
+            }, 1800);
+
+            setTimeout(showAnalysis, 4500);
+        });
+
+        function showAnalysis() {
+            clearInterval(jokeInterval);
+            landingView.classList.add('hidden');
+            analysisView.classList.remove('hidden');
+            
+            const scoreElement = document.getElementById('scoreValue');
+            animateValue(scoreElement, 0, 82, 1500);
+        }
+
+        startOverButton.addEventListener('click', () => {
+             analysisView.classList.add('hidden');
+             landingView.classList.remove('hidden');
+             submitButton.classList.remove('loading');
+             submitButton.disabled = false;
+        });
+
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start);
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        }
+    </script>
+</body>
+</html>
