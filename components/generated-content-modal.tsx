@@ -64,17 +64,17 @@ export function GeneratedContentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
+      <DialogContent className="w-full sm:max-w-3xl max-w-[95vw] max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-auto bg-muted/50 rounded-lg p-4 font-mono text-sm">
+        <div className="flex-1 overflow-auto bg-muted/50 rounded-lg p-3 sm:p-4 font-mono text-xs sm:text-sm">
           <pre className="whitespace-pre-wrap">{content}</pre>
         </div>
 
-        <div className="flex gap-2 pt-4 border-t">
+        <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
           <Button onClick={handleCopy} variant="outline" className="flex-1">
             {copied ? (
               <>

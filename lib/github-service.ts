@@ -412,6 +412,27 @@ export class GitHubService {
   }
 
   /**
+   * Get raw text content of a file from repository contents API
+   * Decodes Base64 when type is file; returns null if not found
+   * @see https://docs.github.com/rest/repos/contents
+   */
+  async getFileText(owner: string, repo: string, path: string): Promise<string | null> {
+    try {
+      const response = await this.fetchWithRetry(
+        `${GITHUB_API_BASE}/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`
+      )
+      const data = await response.json()
+      if (data && data.type === 'file' && data.content) {
+        const content = Buffer.from(String(data.content).replace(/\n/g, ''), 'base64').toString('utf-8')
+        return content
+      }
+      return null
+    } catch {
+      return null
+    }
+  }
+
+  /**
    * List commits for a repository (optionally filtered by author)
    * @see https://docs.github.com/rest/commits/commits
    */
