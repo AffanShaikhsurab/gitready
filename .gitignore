@@ -7,6 +7,8 @@ node_modules/
 .DS_Store
 *.log
 npm-debug.log*
+log.txt
+.gitignore
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
@@ -17,3 +19,5 @@ next-env.d.ts
 /.qodo/
 docs/
 *.md
+!README.md
+!CONTRIBUTIONS.md
