@@ -83,8 +83,16 @@ export function LandingView({ onAnalyze }: LandingViewProps) {
       {/* Main Content */}
       <main className="flex flex-col items-center justify-center min-h-screen px-6">
         <div className="max-w-[680px] w-full text-center animate-fadeIn">
-          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight mb-4">
+          <h1 className="relative text-5xl md:text-6xl font-extrabold leading-tight mb-4">
             Is your GitHub portfolio optimized?
+            <Image
+              src="/investigator.png"
+              alt="Investigator"
+              width={160}
+              height={160}
+              className="absolute right-0 top-1/2 -translate-y-1/2 -z-10 pointer-events-none"
+              style={{ transform: 'rotate(20deg)' }}
+            />
           </h1>
           <p className="text-lg text-muted-foreground max-w-[580px] mx-auto leading-relaxed mb-10">
             See your profile through an employer&apos;s eyes. Our AI will analyze your commits, repos, and activity against{' '}

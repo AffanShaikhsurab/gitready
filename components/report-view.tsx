@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button'
 import { RotateCcw, Download, Share2, ExternalLink } from 'lucide-react'
 import Image from 'next/image'
 import { GeneratedContentModal } from '@/components/generated-content-modal'
-import { generateReadme, generateTests, generateCI } from '@/lib/content-generators'
+import { generateTests, generateCI } from '@/lib/content-generators'
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 
 export function ReportView() {
   const { userData, analysisResult, resetAnalysis, repos } = useAppStore()
@@ -21,9 +22,11 @@ export function ReportView() {
   const [currentAction, setCurrentAction] = useState<"readme" | "tests" | "ci" | null>(null)
   const [autoPRStatusText, setAutoPRStatusText] = useState<string | undefined>(undefined)
   const [autoPRStatusType, setAutoPRStatusType] = useState<'success' | 'error' | undefined>(undefined)
+  const [isGhAuthenticated, setIsGhAuthenticated] = useState<boolean | null>(null)
   const handleAuth = () => {
     try {
-      const scope = encodeURIComponent('public_repo,user:email,workflow')
+      // Space-delimited scopes per GitHub OAuth requirements
+      const scope = encodeURIComponent('public_repo user:email workflow')
       const returnTo = encodeURIComponent(window.location.href)
       window.location.href = `/api/auth/github/login?scope=${scope}&returnTo=${returnTo}`
     } catch (e) {
@@ -37,6 +40,23 @@ export function ReportView() {
     userData,
     analysisResult 
   })
+
+  // Check GitHub auth status once on mount
+  if (typeof window !== 'undefined' && isGhAuthenticated === null) {
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/status')
+        if (res.ok) {
+          const data = await res.json()
+          setIsGhAuthenticated(!!data?.authenticated)
+        } else {
+          setIsGhAuthenticated(false)
+        }
+      } catch {
+        setIsGhAuthenticated(false)
+      }
+    })()
+  }
 
   if (!userData || !analysisResult) {
     console.warn('[ReportView] Missing required data:', { userData, analysisResult })
@@ -56,18 +76,50 @@ export function ReportView() {
     )
   }
 
-  const primaryRepo = repos && repos.length > 0 ? repos[0] : null
-  const repoFullName = primaryRepo?.full_name || ''
-  const [owner, repoName] = repoFullName.split('/')
+  // Repo selection: default to first repo missing README, otherwise first repo
+  const defaultRepo = repos?.find(r => !r.has_readme) || (repos && repos[0]) || null
+  const [selectedRepo, setSelectedRepo] = useState(defaultRepo)
+  const selectedFullName = selectedRepo?.full_name || ''
+  const [owner, repoName] = selectedFullName.split('/')
 
-  const openModalFor = (action: 'readme' | 'tests' | 'ci') => {
-    if (!primaryRepo) return
+  const openModalFor = async (action: 'readme' | 'tests' | 'ci') => {
+    if (!selectedRepo) return
+    // Preflight: require OAuth before generating content/PRs
+    try {
+      const status = await fetch('/api/auth/status', { method: 'GET' })
+      if (status.ok) {
+        const data = await status.json()
+        if (!data?.authenticated) {
+          handleAuth()
+          return
+        }
+      }
+    } catch (e) {
+      console.warn('Auth status check failed, proceeding to auth:', e)
+      handleAuth()
+      return
+    }
     setCurrentAction(action)
-    const language = primaryRepo.language || 'JavaScript'
+    const language = selectedRepo.language || 'JavaScript'
     if (action === 'readme') {
       setModalTitle('README.md template')
       setModalDesc('Auto-generated README covering What/Why/How and setup.')
-      setModalContent(generateReadme(repoName, language))
+      try {
+        const res = await fetch('/api/generate/readme', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ owner, repo: repoName, language })
+        })
+        if (res.ok) {
+          const data = await res.json()
+          setModalContent(data?.content || '')
+        } else {
+          const err = await res.json().catch(() => ({ error: 'Failed to generate README' }))
+          setModalContent(err?.error || 'Failed to generate README')
+        }
+      } catch (e: any) {
+        setModalContent(e?.message || 'Failed to generate README')
+      }
       setModalFilename('README.md')
     } else if (action === 'tests') {
       setModalTitle('Basic tests template')
@@ -93,7 +145,7 @@ export function ReportView() {
       setAutoPRSubmitting(true)
       setAutoPRStatusText(undefined)
       setAutoPRStatusType(undefined)
-      const language = primaryRepo?.language || 'JavaScript'
+      const language = selectedRepo?.language || 'JavaScript'
       const res = await fetch('/api/apply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -122,31 +174,31 @@ export function ReportView() {
   return (
     <>
       {/* Header */}
-      <header className="w-full max-w-[1200px] mx-auto flex items-center px-6 py-6">
+      <header className="w-full max-w-[1200px] mx-auto flex items-center justify-between px-4 sm:px-6 py-4 sm:py-6">
         <Image
           src="/ic_launcher-web.png"
           alt="GitReady"
           width={32}
           height={32}
           unoptimized
-          className="mr-auto rounded"
+          className="rounded"
         />
-        <nav className="flex gap-6">
+        <nav className="hidden md:flex gap-6">
           <a href="#" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
             How It Works
           </a>
         </nav>
       </header>
 
-      <div className="max-w-[1200px] mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 sm:gap-8">
           {/* Main Content */}
           <main className="space-y-8 animate-fadeIn" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
             {/* Score Header */}
-            <Card className="p-8 flex flex-col md:flex-row gap-8 items-center">
+            <Card className="p-6 sm:p-8 flex flex-col md:flex-row gap-6 md:gap-8 items-center">
               <div className="text-center md:text-left">
                 <p className="text-base font-semibold text-muted-foreground mb-1">Employability Score</p>
-                <div className="text-7xl font-extrabold leading-none bg-gradient-to-br from-green-400 to-blue-500 bg-clip-text text-transparent">
+                <div className="text-5xl sm:text-6xl md:text-7xl font-extrabold leading-none bg-gradient-to-br from-green-400 to-blue-500 bg-clip-text text-transparent">
                   {analysisResult.score}
                 </div>
                 <p className="text-base font-medium text-purple-400 mt-2">{analysisResult.tier}</p>
@@ -158,11 +210,14 @@ export function ReportView() {
               </div>
             </Card>
 
-            {primaryRepo && (
-              <div className="flex flex-wrap gap-2">
+            {selectedRepo && (
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
                 <Button variant="outline" onClick={() => openModalFor('readme')}>Generate README</Button>
                 <Button variant="outline" onClick={() => openModalFor('tests')}>Generate Tests</Button>
                 <Button variant="outline" onClick={() => openModalFor('ci')}>Generate CI</Button>
+                <div className="sm:ml-auto mt-2 sm:mt-0 text-sm text-muted-foreground flex items-center">
+                  {isGhAuthenticated ? 'GitHub: Signed in' : 'GitHub: Not authenticated'}
+                </div>
               </div>
             )}
 
@@ -202,38 +257,38 @@ export function ReportView() {
             </section>
 
             {/* Issues (if any) */}
-            {analysisResult.issues && analysisResult.issues.length > 0 && (
-              <section>
-                <h2 className="text-2xl font-bold mb-5">What&apos;s Holding You Back</h2>
-                <div className="space-y-4">
-                  {analysisResult.issues.map((issue, index) => {
-                    console.log('[ReportView] Rendering issue:', issue)
-                    return (
-                      <Card key={index} className="p-6">
-                        <div className="flex items-start gap-4">
-                          <div className="text-3xl">⚠️</div>
-                          <div className="flex-1">
-                            <h3 className="text-lg font-semibold mb-2">{issue.title}</h3>
-                            <p className="text-sm text-muted-foreground mb-3">
-                              <strong>Evidence:</strong> {issue.evidence}
-                            </p>
-                            <p className="text-sm mb-3">{issue.why}</p>
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-medium text-muted-foreground">
-                                Confidence: {issue.confidence}
-                              </span>
-                              <Button variant="outline" size="sm">
-                                {issue.fix} →
-                              </Button>
+              {analysisResult.issues && analysisResult.issues.length > 0 && (
+                <section>
+                  <h2 className="text-2xl font-bold mb-5">What&apos;s Holding You Back</h2>
+                  <div className="space-y-4">
+                    {analysisResult.issues.map((issue, index) => {
+                      console.log('[ReportView] Rendering issue:', issue)
+                      return (
+                        <Card key={index} className="p-6">
+                          <div className="flex flex-col sm:flex-row items-start gap-4">
+                            <div className="text-3xl">⚠️</div>
+                            <div className="flex-1">
+                              <h3 className="text-lg font-semibold mb-2">{issue.title}</h3>
+                              <p className="text-sm text-muted-foreground mb-3">
+                                <strong>Evidence:</strong> {issue.evidence}
+                              </p>
+                              <p className="text-sm mb-3">{issue.why}</p>
+                              <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+                                <span className="text-xs font-medium text-muted-foreground">
+                                  Confidence: {issue.confidence}
+                                </span>
+                                <Button variant="outline" size="sm">
+                                  {issue.fix} →
+                                </Button>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </Card>
-                    )
-                  })}
-                </div>
-              </section>
-            )}
+                        </Card>
+                      )
+                    })}
+                  </div>
+                </section>
+              )}
 
             {/* Action Plan */}
             <section>
@@ -305,6 +360,30 @@ export function ReportView() {
 
             {/* Actions */}
             <div className="mt-6 space-y-2">
+              {/* Repo Selector */}
+              {repos && repos.length > 0 && (
+                <div className="space-y-2">
+                  <div className="text-sm font-medium">Target Repository</div>
+                  <Select
+                    value={selectedRepo?.full_name || ''}
+                    onValueChange={(val) => {
+                      const next = repos.find(r => r.full_name === val) || null
+                      setSelectedRepo(next!)
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select repository" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {repos.map((r) => (
+                        <SelectItem key={r.id} value={r.full_name}>
+                          {r.full_name}{!r.has_readme ? ' — Missing README' : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <Button
                 variant="ghost"
                 className="w-full justify-start"
@@ -333,7 +412,7 @@ export function ReportView() {
         description={modalDesc}
         content={modalContent}
         filename={modalFilename}
-        onAutoPR={primaryRepo ? handleAutoPR : undefined}
+        onAutoPR={selectedRepo ? handleAutoPR : undefined}
         autoPRLabel={currentAction ? `Auto-PR ${currentAction.toUpperCase()}` : undefined}
         isSubmitting={autoPRSubmitting}
         statusText={autoPRStatusText}

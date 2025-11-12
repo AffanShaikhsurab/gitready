@@ -3,14 +3,15 @@ import { NextResponse } from 'next/server'
 // Redirects the user to GitHub OAuth authorize with a CSRF state cookie.
 export async function GET(req: Request) {
   const url = new URL(req.url)
-  const scope = url.searchParams.get('scope') || 'public_repo,user:email,workflow'
+  // GitHub expects space-delimited scopes
+  const scope = url.searchParams.get('scope') || 'public_repo user:email workflow'
   const returnTo = url.searchParams.get('returnTo') || '/'
 
   const clientId = process.env.GITHUB_CLIENT_ID
   const callback = process.env.GITHUB_CALLBACK_URL
   if (!clientId || !callback) {
     return NextResponse.json({
-      error: 'GitHub OAuth is not configured. Set GITHUB_CLIENT_ID and NEXTAUTH_URL.'
+      error: 'GitHub OAuth is not configured. Set GITHUB_CLIENT_ID and GITHUB_CALLBACK_URL.'
     }, { status: 500 })
   }
 

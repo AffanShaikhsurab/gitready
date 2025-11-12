@@ -3,54 +3,191 @@
 export const generateReadme = (repoName: string, language: string): string => {
   return `# ${repoName}
 
-> Because every repo deserves a README, even the ones from 3am hackathons 🌙
+## Overview
 
-## What is this?
+${repoName} is a ${language}-based project. Use this README to understand the goals, setup, and maintenance workflow.
 
-[Describe what your project does. Be honest - if it's a calculator, say it's a calculator. The world has enough "revolutionary" calculators.]
+## Features
 
-## Why does this exist?
+- Clear project structure and predictable scripts
+- Environment-driven configuration
+- Testing baseline and CI-ready pipeline
 
-[Explain the problem you solved. Or the problem you're trying to solve. Or just admit you were learning ${language}.]
+## Requirements
 
-## How do I use it?
+- ${language}
+- Node.js 18+ and npm (or your language-specific toolchain)
+
+## Installation
 
 \`\`\`bash
-# Clone this bad boy
-git clone https://github.com/yourusername/${repoName}.git
-
-# Install dependencies (you know the drill)
+git clone https://github.com/<your-github>/${repoName}.git
+cd ${repoName}
 npm install
+\`\`\`
 
-# Run it (fingers crossed)
+## Usage
+
+\`\`\`bash
+# Development
+npm run dev
+
+# Production build
+npm run build
+
+# Start
 npm start
 \`\`\`
 
-## Tech Stack
+## Configuration
 
-- ${language}
-- [Add other technologies]
-- Coffee ☕
-- Stack Overflow 🙏
+Create a \`.env.local\` file and set required variables. Keep secrets out of source control.
+
+## Testing
+
+\`\`\`bash
+npm test
+\`\`\`
+
+Add tests under \`tests/\` and follow the project conventions.
+
+## Continuous Integration
+
+This repository is compatible with GitHub Actions. A starter workflow runs install, lint, tests, and build.
+
+## Project Structure
+
+\`\`\`
+src/            # Application source
+tests/          # Test files
+.github/workflows/ci.yml  # CI pipeline
+\`\`\`
 
 ## Contributing
 
-Found a bug? Want to add a feature? PRs are welcome!
-
-Just remember:
-1. Fork it
-2. Create your feature branch (\`git checkout -b feature/amazing\`)
-3. Commit your changes (\`git commit -m 'Add amazing feature'\`)
-4. Push to the branch (\`git push origin feature/amazing\`)
-5. Open a Pull Request
+1. Fork the repository
+2. Create a feature branch: \`git checkout -b feature/your-change\`
+3. Commit with clear messages
+4. Open a Pull Request describing the change and impact
 
 ## License
 
-MIT - Do whatever you want, but don't blame me if it breaks 😅
+MIT
+`
+}
 
----
+export interface ReadmeDetails {
+  repoName: string
+  language: string
+  description?: string | null
+  frameworks?: string[]
+  usesTypeScript?: boolean
+  hasTests?: boolean
+  hasCI?: boolean
+  topics?: string[]
+  packageManager?: 'npm' | 'yarn' | 'pnpm' | 'bun' | 'pip' | 'poetry' | 'pipenv' | 'unknown'
+  scripts?: {
+    dev?: string
+    build?: string
+    start?: string
+    test?: string
+    lint?: string
+  }
+  structure?: string[]
+}
 
-**Made with ❤️ and way too much caffeine**
+export const generateReadmeProfessional = (d: ReadmeDetails): string => {
+  const pm = d.packageManager || 'npm'
+  const run = (script?: string) => (script ? `${pm} run ${script}` : `${pm} run <script>`)
+  const hasScript = (name: keyof NonNullable<ReadmeDetails['scripts']>) => !!d.scripts && !!d.scripts[name]
+
+  const techStack: string[] = []
+  if (d.language) techStack.push(d.language)
+  if (d.usesTypeScript) techStack.push('TypeScript')
+  if (d.frameworks && d.frameworks.length) techStack.push(...d.frameworks)
+
+  const features: string[] = []
+  if (d.usesTypeScript) features.push('Type-safe code with TypeScript')
+  if (hasScript('lint')) features.push('Consistent code style with linting')
+  if (d.hasTests) features.push('Test baseline in place')
+  if (d.hasCI) features.push('CI pipeline for build/test checks')
+  if (features.length === 0) features.push('Clean project structure and straightforward scripts')
+
+  const structure = (d.structure && d.structure.length) ? d.structure : ['src/', 'tests/', '.github/workflows/']
+
+  const scriptsHelp: string[] = []
+  if (hasScript('dev')) scriptsHelp.push(`Development: \`${run(d.scripts?.dev)}\``)
+  if (hasScript('build')) scriptsHelp.push(`Build: \`${run(d.scripts?.build)}\``)
+  if (hasScript('start')) scriptsHelp.push(`Start: \`${run(d.scripts?.start)}\``)
+  if (hasScript('test')) scriptsHelp.push(`Test: \`${pm === 'pip' ? 'pytest' : run(d.scripts?.test)}\``)
+  if (hasScript('lint')) scriptsHelp.push(`Lint: \`${run(d.scripts?.lint)}\``)
+
+  const usageBlock = scriptsHelp.length
+    ? scriptsHelp.map((l) => `- ${l}`).join('\n')
+    : `- Development: \`${pm} run dev\`\n- Build: \`${pm} run build\`\n- Start: \`${pm} start\`\n- Test: \`${pm} test\``
+
+  const pmInstall = pm === 'yarn' ? 'yarn' : pm === 'pnpm' ? 'pnpm install' : pm === 'bun' ? 'bun install' : pm === 'pip' ? 'pip install -r requirements.txt' : 'npm install'
+
+  const desc = d.description ? `\n${d.description}\n` : ''
+
+  return `# ${d.repoName}
+
+## Overview
+
+${d.repoName} is a ${techStack.join(', ')} project.${desc} This README covers goals, setup, usage, and maintenance in a concise, professional format.
+
+## Tech Stack
+
+- ${techStack.join('\n- ')}
+${d.topics && d.topics.length ? `\n> Topics: ${d.topics.join(', ')}` : ''}
+
+## Features
+
+${features.map((f) => `- ${f}`).join('\n')}
+
+## Requirements
+
+- Node.js 18+${d.language.toLowerCase() === 'python' ? ' (if applicable)' : ''}
+- ${pm.toUpperCase()} or preferred package manager
+
+## Installation
+
+\`\`\`bash
+git clone https://github.com/<your-github>/${d.repoName}.git
+cd ${d.repoName}
+${pmInstall}
+\`\`\`
+
+## Usage
+
+${usageBlock}
+
+## Project Structure
+
+\`\`\`
+${structure.join('\n')}
+\`\`\`
+
+## Testing
+
+${d.hasTests ? 'This repository includes a test baseline.' : 'Add tests under `tests/` (or your framework convention) to establish coverage.'}
+
+${hasScript('test') ? `Run tests with \`${run(d.scripts?.test)}\`.` : ''}
+
+## Continuous Integration
+
+${d.hasCI ? 'GitHub Actions workflows are configured under `.github/workflows`.' : 'You can add GitHub Actions workflows under `.github/workflows` to run install, lint, tests, and build on every push.'}
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: \`git checkout -b feature/your-change\`
+3. Commit with clear messages
+4. Open a Pull Request describing the change and impact
+
+## License
+
+MIT
 `
 }
 
