@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useAppStore } from '@/lib/store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -13,9 +14,10 @@ interface LandingViewProps {
 
 export function LandingView({ onAnalyze }: LandingViewProps) {
   const [username, setUsername] = useState('')
-  const [role, setRole] = useState('Frontend')
+  const [role, setRole] = useState('Front Web')
   const [seniority, setSeniority] = useState('Junior')
   const [isLoading, setIsLoading] = useState(false)
+  const { error } = useAppStore()
 
   // Extract username from GitHub URL or use as-is
   const extractUsername = (input: string): string => {
@@ -99,6 +101,11 @@ export function LandingView({ onAnalyze }: LandingViewProps) {
             <strong className="text-foreground font-semibold">real job specs</strong> to find where you shine, and what to build next.
           </p>
 
+          {error && (
+            <div className="mb-4 text-sm text-red-400">
+              {error}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
             <div className="flex flex-col md:flex-row gap-4">
               {/* Username Input */}
@@ -119,18 +126,22 @@ export function LandingView({ onAnalyze }: LandingViewProps) {
               {/* Role Select */}
               <div className="flex-grow">
                 <label htmlFor="role" className="flex items-center gap-1 text-sm font-medium text-muted-foreground mb-2 text-left">
-                  Target Role
+                  Target Domain
                 </label>
                 <Select value={role} onValueChange={setRole}>
                   <SelectTrigger id="role">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Frontend">Frontend</SelectItem>
+                    <SelectItem value="Front Web">Front Web</SelectItem>
                     <SelectItem value="Backend">Backend</SelectItem>
                     <SelectItem value="Fullstack">Fullstack</SelectItem>
-                    <SelectItem value="DevOps">DevOps</SelectItem>
+                    <SelectItem value="Android">Android</SelectItem>
+                    <SelectItem value="iOS">iOS</SelectItem>
+                    <SelectItem value="AI/ML">AI/ML</SelectItem>
                     <SelectItem value="Data Science">Data Science</SelectItem>
+                    <SelectItem value="DevOps">DevOps</SelectItem>
+                    <SelectItem value="Game Dev">Game Dev</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -151,8 +162,9 @@ export function LandingView({ onAnalyze }: LandingViewProps) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="Fresher">Fresher</SelectItem>
                     <SelectItem value="Junior">Junior</SelectItem>
-                    <SelectItem value="Mid-level">Mid-level</SelectItem>
+                    <SelectItem value="Mid">Mid</SelectItem>
                     <SelectItem value="Senior">Senior</SelectItem>
                   </SelectContent>
                 </Select>

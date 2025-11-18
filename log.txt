@@ -142,3 +142,135 @@ Modified Files: ["2.pack.gz","5.pack.gz","6.pack.gz","index.pack.gz.old","FETCH_
 Summary:
 Error generating summary.
 
+===============================
+	Work log generated at 11/11/2025, 11:35:53 AM:
+	
+
+Modified Files: ["0.pack.gz","index.pack.gz.old","FETCH_HEAD","README.md","CONTRIBUTIONS.md",".gitignore","index","log.txt","app-build-manifest.json","build-manifest.json","react-loadable-manifest.json","route_client-reference-manifest.js","page_client-reference-manifest.js","middleware-build-manifest.js","middleware-react-loadable-manifest.js","next-font-manifest.js","next-font-manifest.json","layout.js","webpack.js","_buildManifest.js","_ssgManifest.js","COMMIT_EDITMSG","HEAD","github-oauth-integration"]
+	Created Files: ["0.pack.gz_","index.pack.gz","index.pack.gz_","CONTRIBUTIONS.md",".gitignore_20251111111320","4aa3799feac31514.webpack.hot-update.json","layout.4aa3799feac31514.hot-update.js","layout.b01cb29eec50ff66.hot-update.js","b01cb29eec50ff66.webpack.hot-update.json","webpack.4aa3799feac31514.hot-update.js","webpack.b01cb29eec50ff66.hot-update.js",".gitignore_20251111111359","index.lock","ORIG_HEAD"]
+	Deleted Files: ["0.pack.gz_","index.pack.gz","HEAD.lock","index.pack.gz_","index.lock"]
+	===============================
+
+Summary:
+Error generating summary.
+
+===============================
+	Work log generated at 11/11/2025, 12:05:53 PM:
+	
+
+Modified Files: ["0.pack.gz","index.pack.gz.old"]
+	Created Files: ["0.pack.gz_"]
+	Deleted Files: ["0.pack.gz_","index.pack.gz"]
+	===============================
+
+Summary:
+Error generating summary.
+
+===============================
+	Work log generated at 11/11/2025, 12:35:53 PM:
+	
+
+Modified Files: ["0.pack.gz","index.pack.gz.old"]
+	Created Files: ["0.pack.gz_","index.pack.gz"]
+	Deleted Files: ["0.pack.gz_"]
+	===============================
+
+Summary:
+Error generating summary.
+
+===============================
+	Work log generated at 11/12/2025, 8:23:46 PM:
+	
+
+Modified Files: ["FETCH_HEAD","main","FEATURE_PLAN.md"]
+	Created Files: ["main.lock","HEAD.lock","FEATURE_PLAN.md"]
+	Deleted Files: ["HEAD.lock","main.lock"]
+	===============================
+
+Summary:
+Error generating summary.
+
+===============================
+	Work log generated at 11/12/2025, 8:53:46 PM:
+	
+
+Modified Files: ["FETCH_HEAD","landing-view.tsx","landing-view_20251112204707.tsx","store.ts","job-taxonomy.ts","github-service.ts","ai-service.ts"]
+	Created Files: ["landing-view_20251112204707.tsx","job-taxonomy.ts","HEAD.lock","landing-view_20251112205004.tsx","landing-view_20251112205130.tsx"]
+	Deleted Files: ["HEAD.lock","job-taxonomy.ts"]
+	===============================
+
+Summary:
+Error generating summary.
+
+===============================
+	Work log generated at 11/12/2025, 9:23:46 PM:
+	
+
+Modified Files: ["ai-service.ts","report-view.tsx","route.ts","routes.d.ts","validator.ts","app-build-manifest.json","build-manifest.json","react-loadable-manifest.json","app-paths-manifest.json","middleware-build-manifest.js","middleware-react-loadable-manifest.js","next-font-manifest.js","next-font-manifest.json","pages-manifest.json","server-reference-manifest.js","server-reference-manifest.json","_buildManifest.js","_ssgManifest.js","cache-life.d.ts","package.json","trace","interception-route-rewrite-manifest.js","middleware-manifest.json","1.pack.gz","index.pack.gz","index.pack.gz.old","package-lock.json",".package-lock.json","types","0.pack","1.pack","index.pack","index.pack.old","1.pack_","5.pack_","3.pack","build-diagnostics.json",".tsbuildinfo","FETCH_HEAD","job-taxonomy.ts","0.pack.gz_","index.pack.gz_","0.pack.gz","webpack-runtime.js","next.js","layout.ts","page.ts","page_client-reference-manifest.js","layout.js","webpack.js","route.js","route_client-reference-manifest.js","landing-view.tsx","page.js","WIsuXQC7YimzNr4AUKXekE0Bh5u1jPANHaXjLhpP0io","1.pack.gz_","2.pack.gz_","3.pack.gz_","2.pack.gz","3.pack.gz","D90aGHv7yg4DnmjmC-0RWgAvqvHETx6Hxz0LQkdjsJw","4.pack.gz_","4.pack.gz","store.ts","layout.css","5.pack.gz_","5.pack.gz","6.pack.gz","@google.js","7.pack.gz","github-service.ts","8.pack.gz","9.pack.gz","10.pack.gz_","10.pack.gz"]
+	Created Files: ["package.json","server","app-build-manifest.json","build-manifest.json","prerender-manifest.json","react-loadable-manifest.json","routes-manifest.json","app-paths-manifest.json","interception-route-rewrite-manifest.js","middleware-build-manifest.js","middleware-manifest.json","middleware-react-loadable-manifest.js","next-font-manifest.js","next-font-manifest.json","pages-manifest.json","server-reference-manifest.js","server-reference-manifest.json","static","chunks","polyfills.js","development","_buildManifest.js","_ssgManifest.js","trace","types","cache-life.d.ts","routes.d.ts","validator.ts","1.pack.gz_","index.pack.gz_","sharp-libvips-darwin-x64","sharp-darwin-arm64","sharp-darwin-x64","sharp-libvips-darwin-arm64","sharp-libvips-linux-arm","sharp-libvips-linux-arm64","sharp-libvips-linux-ppc64","sharp-libvips-linux-riscv64","sharp-libvips-linux-s390x","sharp-libvips-linux-x64","sharp-libvips-linuxmusl-arm64","sharp-libvips-linuxmusl-x64","sharp-linux-arm","sharp-linux-arm64","sharp-linux-ppc64","sharp-linux-riscv64","sharp-linux-s390x","sharp-linux-x64","sharp-linuxmusl-arm64","sharp-linuxmusl-x64","sharp-wasm32","sharp-win32-arm64","sharp-win32-ia32","swc-darwin-arm64","swc-darwin-x64","swc-linux-arm64-gnu","swc-linux-arm64-musl","swc-linux-x64-gnu","swc-linux-x64-musl","swc-win32-arm64-msvc","oxide-android-arm64","oxide-darwin-arm64","oxide-darwin-x64","oxide-freebsd-x64","oxide-linux-arm-gnueabihf","oxide-linux-arm64-gnu","oxide-linux-arm64-musl","oxide-linux-x64-gnu","oxide-linux-x64-musl","oxide-wasm32-wasi","oxide-win32-arm64-msvc","resolver-binding-android-arm-eabi","resolver-binding-android-arm64","resolver-binding-darwin-arm64","resolver-binding-darwin-x64","resolver-binding-freebsd-x64","resolver-binding-linux-arm-gnueabihf","resolver-binding-linux-arm-musleabihf","resolver-binding-linux-arm64-gnu","resolver-binding-linux-arm64-musl","resolver-binding-linux-ppc64-gnu","resolver-binding-linux-riscv64-gnu","resolver-binding-linux-riscv64-musl","resolver-binding-linux-s390x-gnu","resolver-binding-linux-x64-gnu","resolver-binding-linux-x64-musl","resolver-binding-wasm32-wasi","resolver-binding-win32-arm64-msvc","resolver-binding-win32-ia32-msvc","lightningcss-android-arm64","lightningcss-darwin-arm64","lightningcss-darwin-x64","lightningcss-freebsd-x64","lightningcss-linux-arm-gnueabihf","lightningcss-linux-arm64-gnu","lightningcss-linux-arm64-musl","lightningcss-linux-x64-gnu","lightningcss-linux-x64-musl","lightningcss-win32-arm64-msvc","_events.json","diagnostics","build-diagnostics.json","framework.json","app","_not-found","page.js","page.js.nft.json","api","analyze","route.js","route.js.nft.json","apply","auth","callback","github","login","status","generate","readme","586.js","611.js","692.js","752.js","802.js","919.js","pages","_app.js","_app.js.nft.json","_document.js","_document.js.nft.json","_error.js","_error.js.nft.json","webpack-runtime.js","route.ts","layout.ts","page.ts","4.pack","5.pack","page_client-reference-manifest.js","route_client-reference-manifest.js","139.7a5a8e93a21948c1.js","255-cf2e1d3491ac955b.js","4bd1b696-c023c6e3521b1417.js","646.f342b7cffc01feb0.js","76-5701302def18b00b.js","page-9bf487df97858798.js","route-fea62af6ef064dc9.js","layout-8fc6d24ea688dc63.js","page-66b7a188a8e3929c.js","framework-292291387d6b2e39.js","main-48b405f0604ce1bf.js","main-app-2508e892ca940b35.js","_app-82835f42865034fa.js","_error-013f4188946cdd04.js","polyfills-42372ed130431b0a.js","webpack-25e36b4260b64c45.js","css","b637b73d05462cae.css","media","19cfc7226ec3afaa-s.woff2","21350d82a1f187e9-s.woff2","8e9860b6e62d6359-s.woff2","ba9851c3c22cd980-s.woff2","c5fe6dc8356a8c31-s.woff2","df0a9ae256c0569c-s.woff2","e4af272ccee01ff0-s.p.woff2","yYWNFROG8fS1gwU_ojdO0","0.pack_","1.pack_","3.pack_","5.pack_","6.pack_","index.pack_","6.pack","HEAD.lock","vendor-chunks","@floating-ui.js","@radix-ui.js","@swc.js","aria-hidden.js","class-variance-authority.js","clsx.js","get-nonce.js","lucide-react.js","next.js","react-remove-scroll-bar.js","react-remove-scroll.js","react-style-singleton.js","styled-jsx.js","tailwind-merge.js","tslib.js","use-callback-ref.js","use-sidecar.js","zustand.js","_app-pages-browser_node_modules_next_dist_client_dev_noop-turbopack-hmr_js.js","app-pages-internals.js","layout.js","main-app.js","webpack.js","layout.css","webpack","633457081244afec._.hot-update.json","0.pack.gz_","D90aGHv7yg4DnmjmC-0RWgAvqvHETx6Hxz0LQkdjsJw","60.1762961767599.YATp81HySYQgZlnpO_omXVhjHod-Kv0qFamGGSIkk8Q.Vy8iMjJkODAtMTlhNzEyODNmY2Qi.webp","index.pack.gz","@google.js","a948127feb142c80.webpack.hot-update.json","layout.a948127feb142c80.hot-update.js","webpack.a948127feb142c80.hot-update.js","7571822528c858e9.webpack.hot-update.json","layout.7571822528c858e9.hot-update.js","webpack.7571822528c858e9.hot-update.js","landing-view_20251112210547.tsx","ab3e84f04ea443b7.webpack.hot-update.json","layout.ab3e84f04ea443b7.hot-update.js","page.ab3e84f04ea443b7.hot-update.js","webpack.ab3e84f04ea443b7.hot-update.js","300.1762962067858.bw6OHYuE5qrKfMFu6WnAMAtDLVOsqA73BDni2LDzt7E.IjY2NTBmNjBhNDVlNmU5MTY0Y2VhY2JmNGNjYThmNGY0MjM1ODRlY2NmNjc0Mjk1ZGQ3YjBjMGI2NTQ5MTdlYmIi.webp","5b2cd45e53c99300.webpack.hot-update.json","webpack.5b2cd45e53c99300.hot-update.js","2.pack.gz_","3.pack.gz_","6680a70c8b72fa4f.webpack.hot-update.json","webpack.6680a70c8b72fa4f.hot-update.js","cb4c140c3684b86e.webpack.hot-update.json","webpack.cb4c140c3684b86e.hot-update.js","60.1762961937749.YATp81HySYQgZlnpO_omXVhjHod-Kv0qFamGGSIkk8Q.Vy8iMjJkODAtMTlhNzEyODNmY2Qi.webp","4.pack.gz_","add5fa7c17a9da58.webpack.hot-update.json","layout.add5fa7c17a9da58.hot-update.js","page.add5fa7c17a9da58.hot-update.js","webpack.add5fa7c17a9da58.hot-update.js","908630e9042b2d3b.webpack.hot-update.json","layout.908630e9042b2d3b.hot-update.js","webpack.908630e9042b2d3b.hot-update.js","layout.bcbb74f619ce3f33.hot-update.js","page.bcbb74f619ce3f33.hot-update.js","bcbb74f619ce3f33.webpack.hot-update.json","webpack.bcbb74f619ce3f33.hot-update.js","5.pack.gz_","6.pack.gz_","350558ee72bfd730.webpack.hot-update.json","layout.350558ee72bfd730.hot-update.js","webpack.350558ee72bfd730.hot-update.js","landing-view_20251112211303.tsx","11353e24b786c6f8.webpack.hot-update.json","layout.11353e24b786c6f8.hot-update.js","page.11353e24b786c6f8.hot-update.js","webpack.11353e24b786c6f8.hot-update.js","300.1762962529058.bw6OHYuE5qrKfMFu6WnAMAtDLVOsqA73BDni2LDzt7E.IjY2NTBmNjBhNDVlNmU5MTY0Y2VhY2JmNGNjYThmNGY0MjM1ODRlY2NmNjc0Mjk1ZGQ3YjBjMGI2NTQ5MTdlYmIi.webp","7.pack.gz_","layout.f5391a1bcc37f719.hot-update.js","f5391a1bcc37f719.webpack.hot-update.json","webpack.f5391a1bcc37f719.hot-update.js","repo","184cba34fd6a2895.webpack.hot-update.json","layout.184cba34fd6a2895.hot-update.js","webpack.184cba34fd6a2895.hot-update.js","910ff9f695107401.webpack.hot-update.json","layout.910ff9f695107401.hot-update.js","webpack.910ff9f695107401.hot-update.js","layout.d45ef51656ecc8c0.hot-update.js","d45ef51656ecc8c0.webpack.hot-update.json","webpack.d45ef51656ecc8c0.hot-update.js","89c541ef8158db81.webpack.hot-update.json","layout.89c541ef8158db81.hot-update.js","page.89c541ef8158db81.hot-update.js","webpack.89c541ef8158db81.hot-update.js","60.1762962510632.YATp81HySYQgZlnpO_omXVhjHod-Kv0qFamGGSIkk8Q.Vy8iMjJkODAtMTlhNzEyODNmY2Qi.webp","8.pack.gz_","9.pack.gz_","09a26254983ed44f.webpack.hot-update.json","webpack.09a26254983ed44f.hot-update.js","10.pack.gz_","5d04e2632ed1fa42.webpack.hot-update.json","layout.5d04e2632ed1fa42.hot-update.js","webpack.5d04e2632ed1fa42.hot-update.js","a67d254104a04dbb.webpack.hot-update.json","layout.a67d254104a04dbb.hot-update.js","webpack.a67d254104a04dbb.hot-update.js"]
+	Deleted Files: ["package.json","trace","types","server","static","build-manifest.json","routes-manifest.json","app-build-manifest.json","prerender-manifest.json","react-loadable-manifest.json","1.pack.gz_","index.pack.gz_","sharp-wasm32","sharp-linux-arm","sharp-linux-x64","swc-darwin-x64","sharp-darwin-x64","sharp-win32-ia32","sharp-linux-arm64","sharp-linux-ppc64","sharp-linux-s390x","sharp-win32-arm64","swc-darwin-arm64","sharp-darwin-arm64","swc-linux-x64-gnu","lightningcss-darwin-x64","sharp-linux-riscv64","sharp-linuxmusl-x64","swc-linux-x64-musl","lightningcss-freebsd-x64","swc-linux-arm64-gnu","lightningcss-darwin-arm64","sharp-linuxmusl-arm64","swc-linux-arm64-musl","swc-win32-arm64-msvc","lightningcss-android-arm64","lightningcss-linux-x64-gnu","lightningcss-linux-x64-musl","sharp-libvips-linux-arm","sharp-libvips-linux-x64","lightningcss-linux-arm64-gnu","sharp-libvips-darwin-x64","oxide-darwin-x64","lightningcss-linux-arm64-musl","lightningcss-win32-arm64-msvc","sharp-libvips-linux-arm64","sharp-libvips-linux-ppc64","sharp-libvips-linux-s390x","oxide-freebsd-x64","oxide-wasm32-wasi","sharp-libvips-darwin-arm64","oxide-darwin-arm64","sharp-libvips-linux-riscv64","sharp-libvips-linuxmusl-x64","oxide-android-arm64","oxide-linux-x64-gnu","lightningcss-linux-arm-gnueabihf","oxide-linux-x64-musl","resolver-binding-darwin-x64","sharp-libvips-linuxmusl-arm64","oxide-linux-arm64-gnu","resolver-binding-freebsd-x64","resolver-binding-wasm32-wasi","oxide-linux-arm64-musl","oxide-win32-arm64-msvc","resolver-binding-darwin-arm64","resolver-binding-android-arm64","resolver-binding-linux-x64-gnu","resolver-binding-linux-x64-musl","oxide-linux-arm-gnueabihf","resolver-binding-linux-arm64-gnu","resolver-binding-linux-ppc64-gnu","resolver-binding-linux-s390x-gnu","resolver-binding-win32-ia32-msvc","resolver-binding-android-arm-eabi","resolver-binding-linux-arm64-musl","resolver-binding-win32-arm64-msvc","resolver-binding-linux-riscv64-gnu","resolver-binding-linux-riscv64-musl","resolver-binding-linux-arm-gnueabihf","resolver-binding-linux-arm-musleabihf","_events.json","cache-life.d.ts","0.pack_","1.pack_","3.pack_","5.pack_","6.pack_","index.pack_","HEAD.lock","diagnostics","D90aGHv7yg4DnmjmC-0RWgAvqvHETx6Hxz0LQkdjsJw","0.pack.gz_","300.1762837106259.bw6OHYuE5qrKfMFu6WnAMAtDLVOsqA73BDni2LDzt7E.IjY2NTBmNjBhNDVlNmU5MTY0Y2VhY2JmNGNjYThmNGY0MjM1ODRlY2NmNjc0Mjk1ZGQ3YjBjMGI2NTQ5MTdlYmIi.webp","2.pack.gz_","3.pack.gz_","60.1762961767599.YATp81HySYQgZlnpO_omXVhjHod-Kv0qFamGGSIkk8Q.Vy8iMjJkODAtMTlhNzEyODNmY2Qi.webp","4.pack.gz_","5.pack.gz_","6.pack.gz_","300.1762962067858.bw6OHYuE5qrKfMFu6WnAMAtDLVOsqA73BDni2LDzt7E.IjY2NTBmNjBhNDVlNmU5MTY0Y2VhY2JmNGNjYThmNGY0MjM1ODRlY2NmNjc0Mjk1ZGQ3YjBjMGI2NTQ5MTdlYmIi.webp","7.pack.gz_","60.1762961937749.YATp81HySYQgZlnpO_omXVhjHod-Kv0qFamGGSIkk8Q.Vy8iMjJkODAtMTlhNzEyODNmY2Qi.webp","8.pack.gz_","9.pack.gz_","10.pack.gz_"]
+	===============================
+
+Summary:
+Error generating summary.
+
+===============================
+	Work log generated at 11/12/2025, 9:53:46 PM:
+	
+
+Modified Files: ["ai-service.ts","app-paths-manifest.json","pages-manifest.json","server-reference-manifest.js","server-reference-manifest.json","next.js","webpack-runtime.js","layout.ts","page.ts","cache-life.d.ts","package.json","app-build-manifest.json","build-manifest.json","react-loadable-manifest.json","route_client-reference-manifest.js","page_client-reference-manifest.js","middleware-build-manifest.js","middleware-react-loadable-manifest.js","next-font-manifest.js","next-font-manifest.json","layout.js","webpack.js","_buildManifest.js","_ssgManifest.js","FETCH_HEAD","3.pack.gz_","2.pack.gz","3.pack.gz","index.pack.gz","index.pack.gz.old","10.pack.gz","generated-content-modal.tsx","page.js","layout.css","D90aGHv7yg4DnmjmC-0RWgAvqvHETx6Hxz0LQkdjsJw","route.js","route.ts","10.pack.gz_","11.pack.gz_","7.pack.gz_","8.pack.gz_","11.pack.gz","6.pack.gz","7.pack.gz","8.pack.gz","WIsuXQC7YimzNr4AUKXekE0Bh5u1jPANHaXjLhpP0io","2.pack.gz_","6.pack.gz_","0.pack.gz","report-view.tsx","interception-route-rewrite-manifest.js","middleware-manifest.json","routes.d.ts","validator.ts","0.pack.gz_","4.pack.gz_","5.pack.gz_","4.pack.gz","5.pack.gz","12.pack.gz","9.pack.gz"]
+	Created Files: ["a7b15c5a5b097c17.webpack.hot-update.json","layout.a7b15c5a5b097c17.hot-update.js","webpack.a7b15c5a5b097c17.hot-update.js","937682c71f4d234f.webpack.hot-update.json","layout.937682c71f4d234f.hot-update.js","webpack.937682c71f4d234f.hot-update.js","3.pack.gz_","2.pack.gz_","index.pack.gz_","8e50650a0133dc7c.webpack.hot-update.json","layout.8e50650a0133dc7c.hot-update.js","page.8e50650a0133dc7c.hot-update.js","webpack.8e50650a0133dc7c.hot-update.js","60.1762963100550.YATp81HySYQgZlnpO_omXVhjHod-Kv0qFamGGSIkk8Q.Vy8iMjJkODAtMTlhNzEyODNmY2Qi.webp","8.pack.gz_","10.pack.gz_","11.pack.gz_","7.pack.gz_","6.pack.gz_","300.1762963411435.bw6OHYuE5qrKfMFu6WnAMAtDLVOsqA73BDni2LDzt7E.IjY2NTBmNjBhNDVlNmU5MTY0Y2VhY2JmNGNjYThmNGY0MjM1ODRlY2NmNjc0Mjk1ZGQ3YjBjMGI2NTQ5MTdlYmIi.webp","0.pack.gz_","HEAD.lock","layout.d3fc5a0abf793f25.hot-update.js","page.d3fc5a0abf793f25.hot-update.js","d3fc5a0abf793f25.webpack.hot-update.json","webpack.d3fc5a0abf793f25.hot-update.js","deep-analysis","[owner]","[repo]","page.tsx","7b058a3c8d5516f9.webpack.hot-update.json","layout.7b058a3c8d5516f9.hot-update.js","webpack.7b058a3c8d5516f9.hot-update.js","8fdd847a5e2860f6.webpack.hot-update.json","layout.8fdd847a5e2860f6.hot-update.js","webpack.8fdd847a5e2860f6.hot-update.js","4.pack.gz_","5.pack.gz_","page.js","page.ts","page_client-reference-manifest.js","e959ce0d85270f9d.webpack.hot-update.json","webpack.e959ce0d85270f9d.hot-update.js","12.pack.gz_","9.pack.gz_"]
+	Deleted Files: ["HEAD.lock","2.pack.gz_","3.pack.gz_","index.pack.gz_","60.1762962510632.YATp81HySYQgZlnpO_omXVhjHod-Kv0qFamGGSIkk8Q.Vy8iMjJkODAtMTlhNzEyODNmY2Qi.webp","6.pack.gz_","7.pack.gz_","8.pack.gz_","10.pack.gz_","11.pack.gz_","300.1762962529058.bw6OHYuE5qrKfMFu6WnAMAtDLVOsqA73BDni2LDzt7E.IjY2NTBmNjBhNDVlNmU5MTY0Y2VhY2JmNGNjYThmNGY0MjM1ODRlY2NmNjc0Mjk1ZGQ3YjBjMGI2NTQ5MTdlYmIi.webp","0.pack.gz_","4.pack.gz_","5.pack.gz_","12.pack.gz_","9.pack.gz_"]
+	===============================
+
+Summary:
+Error generating summary.
+
+===============================
+	Work log generated at 11/12/2025, 10:23:46 PM:
+	
+
+Modified Files: ["FETCH_HEAD","Results Page UX Overhaul Plan.md","report-view.tsx","app-build-manifest.json","build-manifest.json","react-loadable-manifest.json","route_client-reference-manifest.js","page_client-reference-manifest.js","middleware-build-manifest.js","middleware-react-loadable-manifest.js","next-font-manifest.js","next-font-manifest.json","layout.js","page.js","webpack.js","_buildManifest.js","_ssgManifest.js","app-paths-manifest.json","pages-manifest.json","server-reference-manifest.js","server-reference-manifest.json","next.js","webpack-runtime.js","page.ts","layout.ts","cache-life.d.ts","package.json","1.pack.gz_","1.pack.gz","12.pack.gz","2.pack.gz","3.pack.gz","index.pack.gz","index.pack.gz.old","11.pack.gz_","11.pack.gz","4.pack.gz","7.pack.gz","route.js","route.ts","WIsuXQC7YimzNr4AUKXekE0Bh5u1jPANHaXjLhpP0io","13.pack.gz_","D90aGHv7yg4DnmjmC-0RWgAvqvHETx6Hxz0LQkdjsJw"]
+	Created Files: [".trae","documents","Results Page UX Overhaul Plan.md","HEAD.lock","16c31df923da63ab.webpack.hot-update.json","layout.16c31df923da63ab.hot-update.js","page.16c31df923da63ab.hot-update.js","webpack.16c31df923da63ab.hot-update.js","1.pack.gz_","12.pack.gz_","2.pack.gz_","3.pack.gz_","index.pack.gz_","11.pack.gz_","4.pack.gz_","7.pack.gz_","300.1762965642132.bw6OHYuE5qrKfMFu6WnAMAtDLVOsqA73BDni2LDzt7E.IjY2NTBmNjBhNDVlNmU5MTY0Y2VhY2JmNGNjYThmNGY0MjM1ODRlY2NmNjc0Mjk1ZGQ3YjBjMGI2NTQ5MTdlYmIi.webp","13.pack.gz_","12.pack.gz","13.pack.gz","60.1762965568551.YATp81HySYQgZlnpO_omXVhjHod-Kv0qFamGGSIkk8Q.Vy8iMjJkODAtMTlhNzEyODNmY2Qi.webp"]
+	Deleted Files: ["HEAD.lock","1.pack.gz_","2.pack.gz_","3.pack.gz_","12.pack.gz_","index.pack.gz_","4.pack.gz_","7.pack.gz_","11.pack.gz_","300.1762963411435.bw6OHYuE5qrKfMFu6WnAMAtDLVOsqA73BDni2LDzt7E.IjY2NTBmNjBhNDVlNmU5MTY0Y2VhY2JmNGNjYThmNGY0MjM1ODRlY2NmNjc0Mjk1ZGQ3YjBjMGI2NTQ5MTdlYmIi.webp","13.pack.gz_","60.1762963100550.YATp81HySYQgZlnpO_omXVhjHod-Kv0qFamGGSIkk8Q.Vy8iMjJkODAtMTlhNzEyODNmY2Qi.webp"]
+	===============================
+
+Summary:
+Error generating summary.
+
+===============================
+	Work log generated at 11/12/2025, 10:53:46 PM:
+	
+
+Modified Files: ["FETCH_HEAD","WIsuXQC7YimzNr4AUKXekE0Bh5u1jPANHaXjLhpP0io","trace","report-view.tsx","layout.js","app-build-manifest.json","build-manifest.json","react-loadable-manifest.json","route_client-reference-manifest.js","page_client-reference-manifest.js","middleware-build-manifest.js","middleware-react-loadable-manifest.js","next-font-manifest.js","next-font-manifest.json","page.js","webpack.js","_buildManifest.js","_ssgManifest.js","1.pack.gz_","2.pack.gz_","3.pack.gz_","index.pack.gz_","0.pack.gz_","webpack-runtime.js","app-paths-manifest.json","pages-manifest.json","server-reference-manifest.js","server-reference-manifest.json","lucide-react.js","next.js","page.ts","layout.ts","cache-life.d.ts","package.json","11.pack.gz_","0.pack.gz","1.pack.gz","11.pack.gz","3.pack.gz","index.pack.gz","index.pack.gz.old","2.pack.gz","interception-route-rewrite-manifest.js","middleware-manifest.json","routes.d.ts","4.pack.gz_","6.pack.gz_","5.pack.gz_","D90aGHv7yg4DnmjmC-0RWgAvqvHETx6Hxz0LQkdjsJw","4.pack.gz","6.pack.gz","5.pack.gz","8.pack.gz_","8.pack.gz"]
+	Created Files: ["HEAD.lock","300.1762967235333.bw6OHYuE5qrKfMFu6WnAMAtDLVOsqA73BDni2LDzt7E.IjY2NTBmNjBhNDVlNmU5MTY0Y2VhY2JmNGNjYThmNGY0MjM1ODRlY2NmNjc0Mjk1ZGQ3YjBjMGI2NTQ5MTdlYmIi.webp","layout.c825ca5cb7041489.hot-update.js","page.c825ca5cb7041489.hot-update.js","c825ca5cb7041489.webpack.hot-update.json","webpack.c825ca5cb7041489.hot-update.js","1.pack.gz_","2.pack.gz_","3.pack.gz_","0.pack.gz_","index.pack.gz_","11.pack.gz_","35620d02248ec230.webpack.hot-update.json","layout.35620d02248ec230.hot-update.js","page.35620d02248ec230.hot-update.js","webpack.35620d02248ec230.hot-update.js","_events.json","server","app-build-manifest.json","build-manifest.json","prerender-manifest.json","react-loadable-manifest.json","routes-manifest.json","app-paths-manifest.json","interception-route-rewrite-manifest.js","middleware-build-manifest.js","middleware-manifest.json","middleware-react-loadable-manifest.js","next-font-manifest.js","next-font-manifest.json","pages-manifest.json","server-reference-manifest.js","server-reference-manifest.json","static","chunks","polyfills.js","development","_buildManifest.js","_ssgManifest.js","trace","types","cache-life.d.ts","package.json","routes.d.ts","validator.ts","app","page.js","vendor-chunks","@floating-ui.js","@radix-ui.js","@swc.js","aria-hidden.js","class-variance-authority.js","clsx.js","get-nonce.js","lucide-react.js","next.js","react-remove-scroll-bar.js","react-remove-scroll.js","react-style-singleton.js","styled-jsx.js","tailwind-merge.js","tslib.js","use-callback-ref.js","use-sidecar.js","zustand.js","webpack-runtime.js","layout.ts","page.ts","4.pack.gz_","6.pack.gz_","page_client-reference-manifest.js","_app-pages-browser_node_modules_next_dist_client_dev_noop-turbopack-hmr_js.js","app-pages-internals.js","layout.js","main-app.js","webpack.js","css","layout.css","media","19cfc7226ec3afaa-s.woff2","21350d82a1f187e9-s.woff2","8e9860b6e62d6359-s.woff2","ba9851c3c22cd980-s.woff2","c5fe6dc8356a8c31-s.woff2","df0a9ae256c0569c-s.woff2","e4af272ccee01ff0-s.p.woff2","webpack","633457081244afec._.hot-update.json","5.pack.gz_","60.1762967923322.YATp81HySYQgZlnpO_omXVhjHod-Kv0qFamGGSIkk8Q.Vy8iMjJkODAtMTlhNzEyODNmY2Qi.webp","_not-found","1575c96dfedaea9b.webpack.hot-update.json","layout.1575c96dfedaea9b.hot-update.js","webpack.1575c96dfedaea9b.hot-update.js","8.pack.gz_"]
+	Deleted Files: ["HEAD.lock","300.1762965642132.bw6OHYuE5qrKfMFu6WnAMAtDLVOsqA73BDni2LDzt7E.IjY2NTBmNjBhNDVlNmU5MTY0Y2VhY2JmNGNjYThmNGY0MjM1ODRlY2NmNjc0Mjk1ZGQ3YjBjMGI2NTQ5MTdlYmIi.webp","0.pack.gz_","1.pack.gz_","3.pack.gz_","11.pack.gz_","index.pack.gz_","2.pack.gz_","_events.json","app-build-manifest.json","trace","types","server","static","build-manifest.json","routes-manifest.json","prerender-manifest.json","react-loadable-manifest.json","60.1762965568551.YATp81HySYQgZlnpO_omXVhjHod-Kv0qFamGGSIkk8Q.Vy8iMjJkODAtMTlhNzEyODNmY2Qi.webp","4.pack.gz_","6.pack.gz_","5.pack.gz_","8.pack.gz_"]
+	===============================
+
+Summary:
+Error generating summary.
+
+===============================
+	Work log generated at 11/12/2025, 11:23:46 PM:
+	
+
+Modified Files: ["webpack-runtime.js","app-paths-manifest.json","pages-manifest.json","server-reference-manifest.js","server-reference-manifest.json","next.js","route.ts","layout.ts","page.ts","cache-life.d.ts","package.json","route.js","WIsuXQC7YimzNr4AUKXekE0Bh5u1jPANHaXjLhpP0io","app-build-manifest.json","build-manifest.json","react-loadable-manifest.json","route_client-reference-manifest.js","page_client-reference-manifest.js","middleware-build-manifest.js","middleware-react-loadable-manifest.js","next-font-manifest.js","next-font-manifest.json","webpack.js","_buildManifest.js","_ssgManifest.js","10.pack.gz_","2.pack.gz_","9.pack.gz_","7.pack.gz_","6.pack.gz","7.pack.gz","index.pack.gz","index.pack.gz.old","8.pack.gz_","10.pack.gz","2.pack.gz","4.pack.gz","8.pack.gz","9.pack.gz","FETCH_HEAD","ai-service.ts","layout.js","report-view.tsx","page.js","3.pack.gz_","4.pack.gz_","1.pack.gz","3.pack.gz"]
+	Created Files: ["auth","status","route.js","route.ts","300.1762968592841.bw6OHYuE5qrKfMFu6WnAMAtDLVOsqA73BDni2LDzt7E.IjY2NTBmNjBhNDVlNmU5MTY0Y2VhY2JmNGNjYThmNGY0MjM1ODRlY2NmNjc0Mjk1ZGQ3YjBjMGI2NTQ5MTdlYmIi.webp","route_client-reference-manifest.js","3b93344238cc26e8.webpack.hot-update.json","webpack.3b93344238cc26e8.hot-update.js","repo","10eb155c5fa11840.webpack.hot-update.json","webpack.10eb155c5fa11840.hot-update.js","9.pack.gz_","10.pack.gz_","2.pack.gz_","7.pack.gz_","6.pack.gz_","index.pack.gz_","8.pack.gz_","4.pack.gz_","index.pack.gz.old","HEAD.lock","78c5f8edf93ea704.webpack.hot-update.json","layout.78c5f8edf93ea704.hot-update.js","webpack.78c5f8edf93ea704.hot-update.js","5f968a4211bde6af.webpack.hot-update.json","layout.5f968a4211bde6af.hot-update.js","page.5f968a4211bde6af.hot-update.js","webpack.5f968a4211bde6af.hot-update.js","1ab9144318221a50.webpack.hot-update.json","layout.1ab9144318221a50.hot-update.js","page.1ab9144318221a50.hot-update.js","webpack.1ab9144318221a50.hot-update.js","3.pack.gz_","1.pack.gz_"]
+	Deleted Files: ["300.1762967235333.bw6OHYuE5qrKfMFu6WnAMAtDLVOsqA73BDni2LDzt7E.IjY2NTBmNjBhNDVlNmU5MTY0Y2VhY2JmNGNjYThmNGY0MjM1ODRlY2NmNjc0Mjk1ZGQ3YjBjMGI2NTQ5MTdlYmIi.webp","6.pack.gz_","7.pack.gz_","index.pack.gz_","index.pack.gz.old","2.pack.gz_","4.pack.gz_","8.pack.gz_","9.pack.gz_","10.pack.gz_","HEAD.lock","1.pack.gz_","3.pack.gz_"]
+	===============================
+
+Summary:
+Error generating summary.
+
+===============================
+	Work log generated at 11/13/2025, 10:05:03 AM:
+	
+
+Modified Files: ["FETCH_HEAD"]
+	Created Files: ["HEAD.lock"]
+	Deleted Files: ["HEAD.lock"]
+	===============================
+
+Summary:
+Error generating summary.
+

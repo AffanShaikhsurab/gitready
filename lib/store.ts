@@ -17,6 +17,7 @@ export interface GitHubRepo {
   commit_count: number
   has_tests: boolean
   has_ci: boolean
+  technologies?: string[]
 }
 
 export interface GitHubUser {
@@ -54,6 +55,19 @@ export interface AnalysisResult {
     link: string
   }[]
   topLanguage: string
+  domainRecommendation?: { domain: string; confidence: number }[]
+  improvementPlan?: string[]
+  projectIdeas?: { title: string; outline: string; targetSkills: string[] }[]
+  techUsage?: { technology: string; usageScore: number }[]
+  jobGaps?: { requirement: string; status: 'missing' | 'partial' | 'met'; suggestion: string }[]
+  repoRecommendations?: {
+    repo: string
+    decision: 'improve' | 'new'
+    reasons: string[]
+    improvements?: string[]
+    newProjectIdea?: { title: string; outline: string; targetUsers: string; differentiation: string }
+    growthPlan?: string[]
+  }[]
 }
 
 interface AppState {
@@ -88,7 +102,7 @@ interface AppState {
 export const useAppStore = create<AppState>((set) => ({
   // Initial state
   username: '',
-  role: 'Frontend',
+  role: 'Front Web',
   seniority: 'Junior',
   userData: null,
   repos: [],

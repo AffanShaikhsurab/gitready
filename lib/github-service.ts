@@ -317,6 +317,7 @@ export class GitHubService {
           commit_count: 0,
           has_tests: false,
           has_ci: false,
+          technologies: [],
         }
 
         // Try to fetch README
@@ -341,6 +342,21 @@ export class GitHubService {
           repoData.has_tests = contents.some((item: any) =>
             testDirs.includes(item.name.toLowerCase())
           )
+
+          // Basic technology detection from root contents
+          const names = contents.map((c: any) => String(c.name).toLowerCase())
+          const has = (n: string) => names.includes(n.toLowerCase())
+          if (has('dockerfile')) repoData.technologies!.push('Docker')
+          if (has('docker-compose.yml')) repoData.technologies!.push('Docker Compose')
+          if (has('package.json')) repoData.technologies!.push('Node.js')
+          if (has('vite.config.ts') || has('vite.config.js')) repoData.technologies!.push('Vite')
+          if (has('next.config.js') || has('next.config.ts')) repoData.technologies!.push('Next.js')
+          if (has('angular.json')) repoData.technologies!.push('Angular')
+          if (has('svelte.config.js') || has('svelte.config.ts')) repoData.technologies!.push('Svelte')
+          if (has('tailwind.config.js') || has('tailwind.config.ts')) repoData.technologies!.push('Tailwind CSS')
+          if (has('build.gradle') || has('settings.gradle') || has('build.gradle.kts')) repoData.technologies!.push('Android')
+          if (has('project.godot')) repoData.technologies!.push('Godot')
+          if (names.some((n: string) => n.endsWith('.csproj'))) repoData.technologies!.push('C#')
         } catch {
           // Can't determine
         }
@@ -352,6 +368,7 @@ export class GitHubService {
           )
           const workflows = await workflowsResponse.json()
           repoData.has_ci = Array.isArray(workflows) && workflows.length > 0
+          if (repoData.has_ci) repoData.technologies!.push('GitHub Actions')
         } catch {
           // No CI workflows
         }
@@ -365,6 +382,51 @@ export class GitHubService {
           repoData.commit_count = commits.length
         } catch {
           repoData.commit_count = 0
+        }
+
+        // Parse package.json dependencies for front-end/back-end frameworks
+        try {
+          const pkgText = await this.getFileText(repo.owner?.login || repo.full_name.split('/')[0], repo.name, 'package.json')
+          if (pkgText) {
+            const pkg = JSON.parse(pkgText)
+            const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) }
+            const depNames = Object.keys(deps).map((d) => d.toLowerCase())
+            const addIf = (label: string, predicate: boolean) => { if (predicate) repoData.technologies!.push(label) }
+            addIf('React', depNames.includes('react'))
+            addIf('Next.js', depNames.includes('next'))
+            addIf('Vue', depNames.includes('vue'))
+            addIf('Nuxt', depNames.includes('nuxt'))
+            addIf('Angular', depNames.includes('@angular/core'))
+            addIf('Svelte', depNames.includes('svelte'))
+            addIf('Tailwind CSS', depNames.includes('tailwindcss'))
+            addIf('Redux', depNames.includes('@reduxjs/toolkit') || depNames.includes('redux'))
+            addIf('Express', depNames.includes('express'))
+            addIf('NestJS', depNames.includes('@nestjs/core'))
+            addIf('TypeScript', depNames.includes('typescript'))
+            addIf('Jest', depNames.includes('jest'))
+            addIf('Vitest', depNames.includes('vitest'))
+          }
+        } catch {
+          // ignore
+        }
+
+        // Python ML detection via requirements.txt
+        try {
+          const reqText = await this.getFileText(repo.owner?.login || repo.full_name.split('/')[0], repo.name, 'requirements.txt')
+          if (reqText) {
+            const lower = reqText.toLowerCase()
+            const addIf = (label: string, predicate: boolean) => { if (predicate) repoData.technologies!.push(label) }
+            addIf('NumPy', lower.includes('numpy'))
+            addIf('Pandas', lower.includes('pandas'))
+            addIf('scikit-learn', lower.includes('scikit-learn') || lower.includes('sklearn'))
+            addIf('TensorFlow', lower.includes('tensorflow'))
+            addIf('PyTorch', lower.includes('torch'))
+            addIf('FastAPI', lower.includes('fastapi'))
+            addIf('Django', lower.includes('django'))
+            addIf('Flask', lower.includes('flask'))
+          }
+        } catch {
+          // ignore
         }
 
         return repoData
@@ -664,6 +726,63 @@ export class GitHubService {
     }
     if (lastError) throw lastError
     throw new Error('Timed out waiting for forked repo availability')
+  }
+
+  /**
+   * Recursively list repository files and build a bounded code bundle
+   * Limits: maxFiles, maxFileSize, allowed extensions
+   */
+  async getRepoCodeBundle(
+    owner: string,
+    repo: string,
+    options: { maxFiles?: number; maxFileSize?: number; allowExt?: string[] } = {}
+  ): Promise<{ manifest: { path: string; size: number }[]; code: string }> {
+    const maxFiles = options.maxFiles ?? 60
+    const maxFileSize = options.maxFileSize ?? 100_000 // ~100 KB per file
+    const allowExt = options.allowExt ?? [
+      '.md', '.js', '.ts', '.jsx', '.tsx', '.json', '.yml', '.yaml', '.py', '.java', '.kt', '.cs'
+    ]
+
+    const isAllowed = (name: string) => {
+      const lower = name.toLowerCase()
+      return allowExt.some((ext) => lower.endsWith(ext))
+    }
+
+    const queue: string[] = ['']
+    const files: { path: string; size: number }[] = []
+    let count = 0
+
+    while (queue.length && count < maxFiles) {
+      const path = queue.shift() as string
+      let items: any[] = []
+      try {
+        items = await this.getRepoContents(owner, repo, path)
+      } catch {
+        continue
+      }
+      for (const it of items) {
+        if (count >= maxFiles) break
+        if (it.type === 'dir') {
+          queue.push(it.path)
+        } else if (it.type === 'file') {
+          if (!isAllowed(it.name)) continue
+          const size = Number(it.size || 0)
+          if (size > maxFileSize) continue
+          files.push({ path: it.path, size })
+          count++
+        }
+      }
+    }
+
+    let code = ''
+    for (const f of files) {
+      const content = await this.getFileText(owner, repo, f.path)
+      if (!content) continue
+      const truncated = content.slice(0, maxFileSize)
+      code += `\n\n--- ${f.path} (${truncated.length} bytes) ---\n${truncated}\n`
+    }
+
+    return { manifest: files, code }
   }
 }
 

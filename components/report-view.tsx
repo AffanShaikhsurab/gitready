@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useAppStore } from '@/lib/store'
+import { getRequirements } from '@/lib/job-taxonomy'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { RotateCcw, Download, Share2, ExternalLink } from 'lucide-react'
@@ -11,7 +12,7 @@ import { generateTests, generateCI } from '@/lib/content-generators'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 
 export function ReportView() {
-  const { userData, analysisResult, resetAnalysis, repos } = useAppStore()
+  const { userData, analysisResult, resetAnalysis, repos, role, seniority } = useAppStore()
 
   const [modalOpen, setModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('')
@@ -81,6 +82,7 @@ export function ReportView() {
   const [selectedRepo, setSelectedRepo] = useState(defaultRepo)
   const selectedFullName = selectedRepo?.full_name || ''
   const [owner, repoName] = selectedFullName.split('/')
+  const [deepCards, setDeepCards] = useState<any[]>([])
 
   const openModalFor = async (action: 'readme' | 'tests' | 'ci') => {
     if (!selectedRepo) return
@@ -139,6 +141,30 @@ export function ReportView() {
     setAutoPRStatusType(undefined)
   }
 
+  const openDeepRepoAnalysis = async (owner: string, repo: string) => {
+    try {
+      setModalTitle('Deep Code Analysis Plan')
+      setModalDesc('AI suggestions based on full-code scan and job expectations')
+      setModalContent('Analyzing repository...')
+      setModalFilename('analysis.json')
+      setModalOpen(true)
+      const res = await fetch('/api/analyze/repo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ owner, repo, role, seniority })
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setModalContent(data?.content || 'No content')
+      } else {
+        const err = await res.json().catch(() => ({ error: 'Failed to analyze repo' }))
+        setModalContent(err?.error || 'Failed to analyze repo')
+      }
+    } catch (e: any) {
+      setModalContent(e?.message || 'Failed to analyze repo')
+    }
+  }
+
   const handleAutoPR = async () => {
     if (!currentAction || !owner || !repoName) return
     try {
@@ -169,6 +195,33 @@ export function ReportView() {
     } finally {
       setAutoPRSubmitting(false)
     }
+  }
+
+  const runAutoDeepAnalysis = async () => {
+    if (!repos || repos.length === 0) return
+    const tops = selectedRepo ? [selectedRepo] : [...repos].slice(0, 1)
+    const results: any[] = []
+    for (const r of tops) {
+      try {
+        const o = r.full_name.split('/')[0]
+        const res = await fetch('/api/analyze/repo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ owner: o, repo: r.name, role, seniority })
+        })
+        if (res.ok) {
+          const data = await res.json()
+          let parsed: any = null
+          try { parsed = JSON.parse(data?.content || '{}') } catch { parsed = null }
+          results.push({ repo: r.full_name, data: parsed })
+        }
+      } catch {}
+    }
+    setDeepCards(results)
+  }
+
+  if (typeof window !== 'undefined' && deepCards.length === 0 && repos && repos.length > 0) {
+    runAutoDeepAnalysis()
   }
 
   return (
@@ -210,16 +263,42 @@ export function ReportView() {
               </div>
             </Card>
 
-            {selectedRepo && (
-              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
-                <Button variant="outline" onClick={() => openModalFor('readme')}>Generate README</Button>
-                <Button variant="outline" onClick={() => openModalFor('tests')}>Generate Tests</Button>
-                <Button variant="outline" onClick={() => openModalFor('ci')}>Generate CI</Button>
-                <div className="sm:ml-auto mt-2 sm:mt-0 text-sm text-muted-foreground flex items-center">
-                  {isGhAuthenticated ? 'GitHub: Signed in' : 'GitHub: Not authenticated'}
+            
+
+            {selectedRepo && (() => {
+              const missingItems = [
+                !selectedRepo.has_readme && 'README',
+                !selectedRepo.has_tests && 'Tests',
+                !selectedRepo.has_ci && 'CI'
+              ].filter(Boolean) as string[]
+              return (
+                <div className="space-y-2">
+                  <div className="flex items-center flex-wrap gap-2">
+                    <div className="text-sm text-muted-foreground mr-2">Selected: {selectedRepo.full_name}</div>
+                    {missingItems.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {missingItems.map((m, i) => (
+                          <span key={i} className="px-2 py-1 text-xs bg-red-600 text-white rounded">Missing {m}</span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">This repo already has README, tests, and CI.</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Recruiters expect visible quality signals: a clear README, passing tests, and CI. We generate focused improvements and open a PR to help your repo meet these expectations.
+                  </p>
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
+                    <Button variant="outline" onClick={() => openModalFor('readme')}>Generate README (PR)</Button>
+                    <Button variant="outline" onClick={() => openModalFor('tests')}>Generate Tests (PR)</Button>
+                    <Button variant="outline" onClick={() => openModalFor('ci')}>Generate CI (PR)</Button>
+                    <div className="sm:ml-auto mt-2 sm:mt-0 text-xs text-muted-foreground flex items-center">
+                      {isGhAuthenticated ? 'GitHub: Signed in' : 'GitHub: Not authenticated'}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
+              )
+            })()}
 
             {/* Signal Strength */}
             <section>
@@ -235,7 +314,7 @@ export function ReportView() {
                           {Array.from({ length: signal.max || 5 }).map((_, i) => (
                             <div
                               key={i}
-                              className={`flex-1 rounded-sm opacity-0 transform scale-y-0 origin-bottom animate-barRaise ${
+                              className={`flex-1 rounded-sm origin-bottom animate-barRaise ${
                                 i < signal.value
                                   ? 'bg-gradient-to-t from-green-600 to-green-400'
                                   : 'bg-border'
@@ -246,7 +325,9 @@ export function ReportView() {
                               }}
                             />
                           ))}
+                          <div className="sr-only">{signal.value}/{signal.max}</div>
                         </div>
+                        <div className="mt-2 text-xs text-muted-foreground">{signal.value} of {signal.max} bars</div>
                       </Card>
                     )
                   })
@@ -255,6 +336,10 @@ export function ReportView() {
                 )}
               </div>
             </section>
+
+            
+
+            
 
             {/* Issues (if any) */}
               {analysisResult.issues && analysisResult.issues.length > 0 && (
@@ -273,14 +358,7 @@ export function ReportView() {
                                 <strong>Evidence:</strong> {issue.evidence}
                               </p>
                               <p className="text-sm mb-3">{issue.why}</p>
-                              <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
-                                <span className="text-xs font-medium text-muted-foreground">
-                                  Confidence: {issue.confidence}
-                                </span>
-                                <Button variant="outline" size="sm">
-                                  {issue.fix} →
-                                </Button>
-                              </div>
+                              <span className="text-xs font-medium text-muted-foreground">Confidence: {issue.confidence}</span>
                             </div>
                           </div>
                         </Card>
@@ -290,43 +368,79 @@ export function ReportView() {
                 </section>
               )}
 
-            {/* Action Plan */}
-            <section>
-              <h2 className="text-2xl font-bold mb-5">3 PRs to 3x Your Interview Rate</h2>
-              <div className="space-y-6">
-                {analysisResult.actions && analysisResult.actions.length > 0 ? (
-                  analysisResult.actions.map((action, index) => {
-                    console.log('[ReportView] Rendering action:', action)
-                    return (
-                      <Card
-                        key={index}
-                        className="p-6 flex flex-col md:flex-row gap-6 items-start hover:-translate-y-1 hover:border-blue-500 transition-all duration-200"
-                      >
-                        <div className="text-2xl font-bold text-muted-foreground mt-1">{action.number}</div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold mb-2">{action.title}</h3>
-                          <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                            {action.description}
-                          </p>
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                            <span className="text-sm font-medium text-muted-foreground">
-                              Effort: {action.effort}
-                            </span>
-                            <Button variant="secondary" size="sm" asChild>
-                              <a href={action.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                                Take Action <ExternalLink className="w-3 h-3" />
-                              </a>
-                            </Button>
-                          </div>
+            
+
+            
+
+            
+
+            
+
+            {/* Project Strategy per Repo */}
+            {analysisResult.repoRecommendations && analysisResult.repoRecommendations.length > 0 && (
+              <section>
+                <h2 className="text-2xl font-bold mb-5">Project Strategy</h2>
+                <div className="space-y-4">
+                  {analysisResult.repoRecommendations.slice(0,1).map((r, i) => (
+                    <Card key={i} className="p-6">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold">{r.repo || 'New Project'}</h3>
+                        <span className="text-xs px-2 py-1 rounded bg-secondary">{r.decision === 'new' ? 'Build New' : 'Improve Existing'}</span>
+                      </div>
+                      {r.reasons && r.reasons.length > 0 && (
+                        <div className="mt-2 text-sm text-muted-foreground">Reasons: {r.reasons.join(', ')}</div>
+                      )}
+                      {r.improvements && r.improvements.length > 0 && (
+                        <div className="mt-3">
+                          <div className="text-sm font-semibold mb-1">Improvements</div>
+                          <ul className="list-disc ml-5 text-sm">
+                            {r.improvements.map((it, idx) => (<li key={idx}>{it}</li>))}
+                          </ul>
                         </div>
-                      </Card>
-                    )
-                  })
-                ) : (
-                  <p className="text-muted-foreground">No actions available</p>
-                )}
-              </div>
-            </section>
+                      )}
+                      {r.newProjectIdea && (
+                        <div className="mt-3">
+                          <div className="text-sm font-semibold mb-1">New Project Idea</div>
+                          <div className="text-sm">{r.newProjectIdea.title}</div>
+                          <div className="text-sm text-muted-foreground">{r.newProjectIdea.outline}</div>
+                          <div className="text-xs mt-1">Target users: {r.newProjectIdea.targetUsers}</div>
+                          <div className="text-xs">Differentiation: {r.newProjectIdea.differentiation}</div>
+                        </div>
+                      )}
+                      {r.growthPlan && r.growthPlan.length > 0 && (
+                        <div className="mt-3">
+                          <div className="text-sm font-semibold mb-1">Growth Plan</div>
+                          <ul className="list-disc ml-5 text-sm">
+                            {r.growthPlan.map((it, idx) => (<li key={idx}>{it}</li>))}
+                          </ul>
+                        </div>
+                      )}
+                      {deepCards && deepCards.length > 0 && (
+                        <div className="mt-4">
+                          <div className="text-sm font-semibold mb-1">Deep Analysis Highlights</div>
+                          {deepCards.slice(0,1).map((c, j) => (
+                            <div key={j} className="space-y-2">
+                              {c.data?.feature_recommendations && c.data.feature_recommendations.length > 0 && (
+                                <div className="text-xs">Features: {c.data.feature_recommendations.slice(0,2).map((f: any) => f.title).join(', ')}</div>
+                              )}
+                              {c.data?.quality_upgrades && c.data.quality_upgrades.length > 0 && (
+                                <div className="text-xs">Quality: {c.data.quality_upgrades.slice(0,2).join(', ')}</div>
+                              )}
+                              <Button variant="outline" size="sm" onClick={() => {
+                                const [o, n] = c.repo.split('/')
+                                window.location.href = `/deep-analysis/${o}/${n}`
+                              }}>Open Full Analysis</Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </Card>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            
           </main>
 
           {/* Sidebar */}
@@ -401,6 +515,39 @@ export function ReportView() {
                 Share Results
               </Button>
             </div>
+
+            {/* Tech Profile vs Job Needs */}
+            {(() => {
+              const reqs = getRequirements(role as any, (seniority === 'Mid-level' ? 'Mid' : seniority) as any)
+              const used = new Set((analysisResult.techUsage || []).map((t: any) => String(t.technology).toLowerCase()))
+              const required = new Set([...(reqs?.skills || []), ...(reqs?.frameworks || [])].map((s: any) => s.toLowerCase()))
+              const missing = Array.from(required).filter((r) => !used.has(r))
+              const present = Array.from(required).filter((r) => used.has(r))
+              return (
+                <Card className="p-5 mt-4">
+                  <div className="text-sm font-semibold mb-2">Tech Profile vs Job Needs</div>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {present.map((p, i) => (
+                      <span key={i} className="px-2 py-1 text-xs bg-green-600 text-white rounded">{p}</span>
+                    ))}
+                    {missing.map((m, i) => (
+                      <span key={i} className="px-2 py-1 text-xs bg-red-600 text-white rounded">{m}</span>
+                    ))}
+                  </div>
+                  {(analysisResult.techUsage || []).slice(0,6).map((t, i) => (
+                    <div key={i} className="mb-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold">{t.technology}</span>
+                        <span className="text-xs text-muted-foreground">{Math.round(t.usageScore * 100)}%</span>
+                      </div>
+                      <div className="mt-1 h-2 bg-border rounded">
+                        <div className="h-2 bg-green-500 rounded" style={{ width: `${Math.round(t.usageScore * 100)}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </Card>
+              )
+            })()}
           </aside>
         </div>
       </div>

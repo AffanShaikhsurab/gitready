@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
     // Run AI analysis
     console.log('[API] Running AI analysis...')
-    const analysis = await aiService.analyzeProfile(userData, repos, role || 'Frontend', seniority || 'Junior')
+    const analysis = await aiService.analyzeProfile(userData, repos, role || 'Front Web', seniority || 'Junior')
     
     console.log('[API] Analysis complete')
 
@@ -59,9 +59,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response)
   } catch (error: any) {
     console.error('[API] Analysis error:', error)
-    return NextResponse.json(
-      { error: error.message || 'Something went wrong. Try again?' },
-      { status: 500 }
-    )
+    const msg = String(error?.message || '')
+    if (msg.includes('Resource not found')) {
+      return NextResponse.json({ error: 'GitHub user not found. Check the username or profile visibility.' }, { status: 404 })
+    }
+    if (msg.includes('Rate limit')) {
+      return NextResponse.json({ error: msg }, { status: 429 })
+    }
+    if (msg.includes('Access forbidden')) {
+      return NextResponse.json({ error: msg }, { status: 403 })
+    }
+    return NextResponse.json({ error: msg || 'Something went wrong. Try again?' }, { status: 500 })
   }
 }
