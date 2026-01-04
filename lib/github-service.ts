@@ -31,11 +31,11 @@ export class GitHubService {
       'Accept': 'application/vnd.github+json',
       'X-GitHub-Api-Version': '2022-11-28',
     }
-    
+
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`
     }
-    
+
     return headers
   }
 
@@ -124,7 +124,7 @@ export class GitHubService {
       headers: this.getHeaders(),
     })
     const data = await response.json()
-    
+
     // Update cache
     this.rateLimitCache = {
       remaining: data.rate.remaining,
@@ -132,7 +132,7 @@ export class GitHubService {
       limit: data.rate.limit,
       lastChecked: Date.now(),
     }
-    
+
     return data
   }
 
@@ -142,11 +142,11 @@ export class GitHubService {
    */
   getCachedRateLimit() {
     if (!this.rateLimitCache) return null
-    
+
     const now = Date.now()
     const resetDate = new Date(this.rateLimitCache.reset * 1000)
     const hasReset = now / 1000 > this.rateLimitCache.reset
-    
+
     return {
       remaining: hasReset ? this.rateLimitCache.limit : this.rateLimitCache.remaining,
       limit: this.rateLimitCache.limit,
@@ -165,7 +165,7 @@ export class GitHubService {
     const now = Date.now()
     if (this.rateLimitCache) {
       const { remaining, reset, lastChecked } = this.rateLimitCache
-      
+
       // If cache is still valid
       if (now - lastChecked < this.CACHE_TTL) {
         // Check if reset time has passed
@@ -186,7 +186,7 @@ export class GitHubService {
     // Fetch fresh rate limit data
     try {
       await this.getRateLimit()
-      
+
       // Check again after fetching
       if (this.rateLimitCache && this.rateLimitCache.remaining < this.RATE_LIMIT_THRESHOLD) {
         const resetDate = new Date(this.rateLimitCache.reset * 1000)
@@ -225,7 +225,7 @@ export class GitHubService {
    */
   async getUserData(username: string): Promise<GitHubUser> {
     console.log('[GitHubService] Fetching user data for:', username)
-    
+
     // Edge case: Validate username
     if (!username || !username.trim()) {
       console.error('[GitHubService] Invalid username')
@@ -234,7 +234,7 @@ export class GitHubService {
 
     const response = await this.fetchWithRetry(`${GITHUB_API_BASE}/users/${username}`)
     const data = await response.json()
-    
+
     console.log('[GitHubService] User data fetched:', {
       login: data.login,
       public_repos: data.public_repos,
@@ -270,7 +270,7 @@ export class GitHubService {
    */
   async getUserRepos(username: string): Promise<GitHubRepo[]> {
     console.log('[GitHubService] Fetching repos for:', username)
-    
+
     // Fetch all public repos (sorted by most recently pushed)
     const response = await this.fetchWithRetry(
       `${GITHUB_API_BASE}/users/${username}/repos?per_page=100&sort=pushed`
@@ -287,7 +287,7 @@ export class GitHubService {
 
     // IMPORTANT: Filter out forks as they don't represent the user's own code
     const nonForkRepos = repos.filter((repo: any) => !repo.fork)
-    
+
     console.log('[GitHubService] Non-fork repos:', nonForkRepos.length)
 
     // Edge case: No non-fork repos found
@@ -412,6 +412,78 @@ export class GitHubService {
   }
 
   /**
+   * Get the full file tree of a repository
+   * Uses the Git Trees API with recursive option for complete file listing
+   * @see https://docs.github.com/rest/git/trees
+   */
+  async getRepoTree(owner: string, repo: string, branch: string = 'main'): Promise<{
+    sha: string
+    tree: Array<{
+      path: string
+      type: 'blob' | 'tree'
+      sha: string
+      size?: number
+    }>
+    truncated: boolean
+  }> {
+    try {
+      // First try the specified branch
+      const response = await this.fetchWithRetry(
+        `${GITHUB_API_BASE}/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`
+      )
+      return await response.json()
+    } catch {
+      // Fall back to 'master' if 'main' doesn't exist
+      if (branch === 'main') {
+        const response = await this.fetchWithRetry(
+          `${GITHUB_API_BASE}/repos/${owner}/${repo}/git/trees/master?recursive=1`
+        )
+        return await response.json()
+      }
+      throw new Error(`Could not fetch tree for branch: ${branch}`)
+    }
+  }
+
+  /**
+   * Batch fetch multiple file contents
+   * More efficient than individual requests for deep analysis
+   */
+  async batchFetchFileContents(
+    owner: string,
+    repo: string,
+    paths: string[],
+    maxSizePerFile: number = 50000  // 50KB limit per file
+  ): Promise<Array<{ path: string; content: string }>> {
+    const results: Array<{ path: string; content: string }> = []
+
+    // Fetch files in parallel with concurrency limit
+    const batchSize = 5
+    for (let i = 0; i < paths.length; i += batchSize) {
+      const batch = paths.slice(i, i + batchSize)
+      const promises = batch.map(async (path) => {
+        try {
+          const content = await this.getFileText(owner, repo, path)
+          if (content && content.length <= maxSizePerFile) {
+            return { path, content }
+          }
+          return null
+        } catch {
+          return null
+        }
+      })
+
+      const batchResults = await Promise.all(promises)
+      for (const result of batchResults) {
+        if (result) {
+          results.push(result)
+        }
+      }
+    }
+
+    return results
+  }
+
+  /**
    * Get raw text content of a file from repository contents API
    * Decodes Base64 when type is file; returns null if not found
    * @see https://docs.github.com/rest/repos/contents
@@ -513,7 +585,7 @@ export class GitHubService {
    */
   extractUsername(input: string): string {
     console.log('[GitHubService] Extracting username from:', input)
-    
+
     // Edge case: Handle empty or invalid input
     if (!input || typeof input !== 'string') {
       console.error('[GitHubService] Invalid input for username extraction')
@@ -525,10 +597,10 @@ export class GitHubService {
       .replace('https://github.com/', '')
       .replace('http://github.com/', '')
       .replace(/\/$/, '') // Remove trailing slash
-    
+
     // Extract just the username
     const username = cleaned.split('/')[0]
-    
+
     // Edge case: Validate extracted username
     if (!username || username.length === 0) {
       console.error('[GitHubService] Could not extract valid username from:', input)

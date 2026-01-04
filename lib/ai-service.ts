@@ -45,7 +45,7 @@ export class AIService {
       const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' })
 
       const prompt = this.buildPrompt(user, repos, role, seniority)
-      
+
       // Generate content with retry logic for handling service unavailability
       const result = await this.generateContentWithRetry(model, prompt)
       const response = result.response
@@ -69,6 +69,201 @@ export class AIService {
     }
   }
 
+  /**
+   * Deep analysis of a single repository with code context
+   * Returns detailed recruiter-perspective feedback
+   */
+  async analyzeRepositoryDeep(
+    repoName: string,
+    description: string | null,
+    targetRole: string,
+    seniority: string,
+    treeOverview: string,
+    fileContents: Array<{ path: string; content: string }>,
+    customApiKey?: string  // Optional user-provided API key
+  ): Promise<{
+    overall_rating: 'Excellent' | 'Good' | 'Needs Improvement' | 'Poor'
+    recruiter_summary: string
+    strengths: Array<{
+      area: string
+      evidence: string
+      recruiter_impact: string
+    }>
+    improvements: Array<{
+      area: string
+      current_state: string
+      recommended_action: string
+      effort_level: 'Quick Win' | 'Medium' | 'Significant'
+      priority: 'High' | 'Medium' | 'Low'
+    }>
+    code_quality_signals: {
+      structure: number
+      documentation: number
+      testing: number
+      best_practices: number
+    }
+  }> {
+    console.log('[AIService] Starting deep analysis for:', repoName)
+
+    // Build the prompt
+    const filesSection = fileContents
+      .slice(0, 15)  // Limit files to avoid token overflow
+      .map(f => `### ${f.path}\n\`\`\`\n${f.content.slice(0, 2500)}\n\`\`\``)
+      .join('\n\n')
+
+    const prompt = `You are a senior technical recruiter and engineering manager reviewing a candidate's GitHub repository.
+
+**Context:**
+- Repository: ${repoName}
+- Description: ${description || 'No description provided'}
+- Candidate is applying for: ${targetRole} position at ${seniority} level
+
+**Repository Structure:**
+${treeOverview}
+
+**Key Files:**
+${filesSection}
+
+**Your Task:**
+Analyze this repository from a recruiter's perspective. Consider:
+1. Would you want to discuss this project in an interview?
+2. Does this demonstrate professional engineering practices?
+3. What specific improvements would make this more impressive?
+
+**Return a JSON object with this exact structure:**
+{
+  "overall_rating": "Excellent" | "Good" | "Needs Improvement" | "Poor",
+  "recruiter_summary": "<2-3 sentences summarizing your impression as a recruiter>",
+  "strengths": [
+    {
+      "area": "<area name>",
+      "evidence": "<specific evidence from the code>",
+      "recruiter_impact": "<why this matters in hiring>"
+    }
+  ],
+  "improvements": [
+    {
+      "area": "<area name>",
+      "current_state": "<what exists now>",
+      "recommended_action": "<specific action to take>",
+      "effort_level": "Quick Win" | "Medium" | "Significant",
+      "priority": "High" | "Medium" | "Low"
+    }
+  ],
+  "code_quality_signals": {
+    "structure": <0-5>,
+    "documentation": <0-5>,
+    "testing": <0-5>,
+    "best_practices": <0-5>
+  }
+}
+
+Be specific and reference actual code/files. Be honest but constructive.`
+
+    // Determine which API key to use
+    // Priority: customApiKey > this.genAI (server-side key)
+    let aiClient = this.genAI
+
+    if (customApiKey) {
+      console.log('[AIService] Using user-provided API key for deep analysis')
+      aiClient = new GoogleGenerativeAI(customApiKey)
+    }
+
+    // If no API key available at all, return mock data
+    if (!aiClient) {
+      console.log('[AIService] No API key available, returning mock deep analysis')
+      return this.getMockDeepAnalysis(repoName)
+    }
+
+    try {
+      const model = aiClient.getGenerativeModel({ model: 'gemini-2.0-flash' })
+      const result = await this.generateContentWithRetry(model, prompt)
+      const response = result.response
+      const text = await response.text()
+
+      // Parse JSON response
+      const jsonMatch = text.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        const analysisData = JSON.parse(jsonMatch[0])
+        console.log('[AIService] Deep analysis complete for:', repoName)
+        return this.formatDeepAnalysisResult(analysisData)
+      }
+
+      console.warn('[AIService] Could not parse deep analysis response')
+      return this.getMockDeepAnalysis(repoName)
+    } catch (error) {
+      console.error('[AIService] Deep analysis failed:', error)
+      return this.getMockDeepAnalysis(repoName)
+    }
+  }
+
+  private formatDeepAnalysisResult(data: any) {
+    return {
+      overall_rating: (['Excellent', 'Good', 'Needs Improvement', 'Poor'].includes(data.overall_rating)
+        ? data.overall_rating
+        : 'Needs Improvement') as 'Excellent' | 'Good' | 'Needs Improvement' | 'Poor',
+      recruiter_summary: data.recruiter_summary || 'Analysis completed.',
+      strengths: (data.strengths || []).map((s: any) => ({
+        area: s.area || 'Unknown',
+        evidence: s.evidence || '',
+        recruiter_impact: s.recruiter_impact || ''
+      })),
+      improvements: (data.improvements || []).map((i: any) => ({
+        area: i.area || 'Unknown',
+        current_state: i.current_state || '',
+        recommended_action: i.recommended_action || '',
+        effort_level: (['Quick Win', 'Medium', 'Significant'].includes(i.effort_level)
+          ? i.effort_level
+          : 'Medium') as 'Quick Win' | 'Medium' | 'Significant',
+        priority: (['High', 'Medium', 'Low'].includes(i.priority)
+          ? i.priority
+          : 'Medium') as 'High' | 'Medium' | 'Low'
+      })),
+      code_quality_signals: {
+        structure: Math.min(Math.max(data.code_quality_signals?.structure || 3, 0), 5),
+        documentation: Math.min(Math.max(data.code_quality_signals?.documentation || 2, 0), 5),
+        testing: Math.min(Math.max(data.code_quality_signals?.testing || 2, 0), 5),
+        best_practices: Math.min(Math.max(data.code_quality_signals?.best_practices || 3, 0), 5)
+      }
+    }
+  }
+
+  private getMockDeepAnalysis(repoName: string) {
+    return {
+      overall_rating: 'Needs Improvement' as const,
+      recruiter_summary: `${repoName} shows potential but needs some improvements to stand out. Adding documentation and tests would significantly strengthen your profile.`,
+      strengths: [
+        {
+          area: 'Project Structure',
+          evidence: 'Clear directory organization',
+          recruiter_impact: 'Shows understanding of standard project layouts'
+        }
+      ],
+      improvements: [
+        {
+          area: 'Documentation',
+          current_state: 'Limited or missing README',
+          recommended_action: 'Add comprehensive README with setup instructions and screenshots',
+          effort_level: 'Quick Win' as const,
+          priority: 'High' as const
+        },
+        {
+          area: 'Testing',
+          current_state: 'No test coverage detected',
+          recommended_action: 'Add unit tests for core functionality',
+          effort_level: 'Medium' as const,
+          priority: 'High' as const
+        }
+      ],
+      code_quality_signals: {
+        structure: 3,
+        documentation: 2,
+        testing: 1,
+        best_practices: 3
+      }
+    }
+  }
+
   private async generateContentWithRetry(model: any, prompt: string, maxRetries: number = 3): Promise<any> {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -77,24 +272,24 @@ export class AIService {
         return result
       } catch (error: any) {
         console.error(`[AIService] API attempt ${attempt} failed:`, error.message)
-        
+
         // Check if it's a 503 service unavailable error
         const isServiceUnavailable = error.message?.includes('503') ||
-                                     error.message?.includes('Service Unavailable') ||
-                                     error.message?.includes('overloaded')
-        
+          error.message?.includes('Service Unavailable') ||
+          error.message?.includes('overloaded')
+
         // If it's the last attempt or not a service unavailable error, throw the error
         if (attempt === maxRetries || !isServiceUnavailable) {
           throw error
         }
-        
+
         // Calculate exponential backoff delay (1s, 2s, 4s)
         const delayMs = Math.pow(2, attempt - 1) * 1000
         console.log(`[AIService] Retrying in ${delayMs}ms...`)
         await new Promise(resolve => setTimeout(resolve, delayMs))
       }
     }
-    
+
     throw new Error('Max retries exceeded')
   }
 
@@ -156,7 +351,7 @@ Be specific, reference actual repo data, and make it fun!`
 
   private formatAnalysisResult(data: any, user: GitHubUser, repos: GitHubRepo[]): AnalysisResult {
     console.log('[AIService] Formatting analysis result...')
-    
+
     // Edge case: Ensure data is valid
     if (!data || typeof data !== 'object') {
       console.warn('[AIService] Invalid analysis data, using defaults')
@@ -164,7 +359,7 @@ Be specific, reference actual repo data, and make it fun!`
     }
 
     const topLanguage = this.getTopLanguage(repos)
-    
+
     // Ensure signals array is properly formatted with 'max' property
     const signals = (data.signals || []).map((signal: any) => ({
       title: signal.title || 'Unknown',
@@ -177,8 +372,8 @@ Be specific, reference actual repo data, and make it fun!`
       title: issue.title || 'Issue',
       evidence: issue.evidence || 'No evidence',
       why: issue.why || 'No explanation',
-      confidence: (issue.confidence === 'High' || issue.confidence === 'Medium' || issue.confidence === 'Low') 
-        ? issue.confidence 
+      confidence: (issue.confidence === 'High' || issue.confidence === 'Medium' || issue.confidence === 'Low')
+        ? issue.confidence
         : 'Medium',
       fix: issue.fix || 'No fix suggested'
     }))
@@ -220,7 +415,7 @@ Be specific, reference actual repo data, and make it fun!`
 
   private getMockAnalysis(user: GitHubUser, repos: GitHubRepo[], role: string, seniority: string): AnalysisResult {
     console.log('[AIService] Generating mock analysis...')
-    
+
     // Edge case: Handle empty repos array
     if (!repos || repos.length === 0) {
       console.warn('[AIService] No repos provided for mock analysis')

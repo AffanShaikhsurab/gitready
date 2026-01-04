@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useAppStore } from '@/lib/store'
+import { useAppStore, GitHubRepo } from '@/lib/store'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { RotateCcw, Download, Share2, ExternalLink } from 'lucide-react'
@@ -9,9 +9,31 @@ import Image from 'next/image'
 import { GeneratedContentModal } from '@/components/generated-content-modal'
 import { generateTests, generateCI } from '@/lib/content-generators'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
+import { RepositoryHealthSection } from '@/components/repository-health-section'
+import { DeepAnalysisSection } from '@/components/deep-analysis-section'
+import { rankReposByImportance } from '@/lib/deep-analyzer-service'
+import { ApiKeyModal, ApiKeyManageModal, ApiKeyStatus, useGeminiApiKey } from '@/components/api-key-modal'
 
 export function ReportView() {
-  const { userData, analysisResult, resetAnalysis, repos } = useAppStore()
+  const {
+    userData,
+    analysisResult,
+    resetAnalysis,
+    repos,
+    role,
+    seniority,
+    deepAnalysisResults,
+    isDeepAnalyzing,
+    deepAnalysisProgress,
+    setDeepAnalysisResult,
+    setIsDeepAnalyzing,
+    setDeepAnalysisProgress
+  } = useAppStore()
+
+  // Gemini API key management
+  const { apiKey: geminiApiKey, hasKey: hasGeminiKey, saveKey: saveGeminiKey, clearKey: clearGeminiKey, isLoaded: isApiKeyLoaded } = useGeminiApiKey()
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false)
+  const [showApiKeyManageModal, setShowApiKeyManageModal] = useState(false)
 
   const [modalOpen, setModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('')
@@ -23,6 +45,7 @@ export function ReportView() {
   const [autoPRStatusText, setAutoPRStatusText] = useState<string | undefined>(undefined)
   const [autoPRStatusType, setAutoPRStatusType] = useState<'success' | 'error' | undefined>(undefined)
   const [isGhAuthenticated, setIsGhAuthenticated] = useState<boolean | null>(null)
+  const [modalRepo, setModalRepo] = useState<GitHubRepo | null>(null)  // Track which repo we're generating for
   const handleAuth = () => {
     try {
       // Space-delimited scopes per GitHub OAuth requirements
@@ -34,11 +57,11 @@ export function ReportView() {
     }
   }
 
-  console.log('[ReportView] Rendering with:', { 
-    hasUserData: !!userData, 
+  console.log('[ReportView] Rendering with:', {
+    hasUserData: !!userData,
     hasAnalysisResult: !!analysisResult,
     userData,
-    analysisResult 
+    analysisResult
   })
 
   // Check GitHub auth status once on mount
@@ -79,11 +102,18 @@ export function ReportView() {
   // Repo selection: default to first repo missing README, otherwise first repo
   const defaultRepo = repos?.find(r => !r.has_readme) || (repos && repos[0]) || null
   const [selectedRepo, setSelectedRepo] = useState(defaultRepo)
-  const selectedFullName = selectedRepo?.full_name || ''
-  const [owner, repoName] = selectedFullName.split('/')
 
-  const openModalFor = async (action: 'readme' | 'tests' | 'ci') => {
-    if (!selectedRepo) return
+  // Helper to get owner/repo from a repo object
+  const getOwnerRepo = (repo: GitHubRepo | null) => {
+    if (!repo) return { owner: '', repoName: '' }
+    const [owner, repoName] = repo.full_name.split('/')
+    return { owner, repoName }
+  }
+
+  const openModalFor = async (action: 'readme' | 'tests' | 'ci', targetRepo?: GitHubRepo) => {
+    const repo = targetRepo || selectedRepo
+    if (!repo) return
+
     // Preflight: require OAuth before generating content/PRs
     try {
       const status = await fetch('/api/auth/status', { method: 'GET' })
@@ -99,10 +129,16 @@ export function ReportView() {
       handleAuth()
       return
     }
+
+    // Store which repo we're working on
+    setModalRepo(repo)
     setCurrentAction(action)
-    const language = selectedRepo.language || 'JavaScript'
+
+    const { owner, repoName } = getOwnerRepo(repo)
+    const language = repo.language || 'JavaScript'
+
     if (action === 'readme') {
-      setModalTitle('README.md template')
+      setModalTitle(`README.md for ${repo.name}`)
       setModalDesc('Auto-generated README covering What/Why/How and setup.')
       try {
         const res = await fetch('/api/generate/readme', {
@@ -122,14 +158,14 @@ export function ReportView() {
       }
       setModalFilename('README.md')
     } else if (action === 'tests') {
-      setModalTitle('Basic tests template')
+      setModalTitle(`Tests for ${repo.name}`)
       setModalDesc('Language-appropriate starter tests to establish coverage.')
       setModalContent(generateTests(repoName, language))
       if (/TypeScript/i.test(language)) setModalFilename('tests/example.test.ts')
       else if (/Python/i.test(language)) setModalFilename('tests/test_example.py')
       else setModalFilename('tests/example.test.js')
     } else {
-      setModalTitle('CI workflow template')
+      setModalTitle(`CI Workflow for ${repo.name}`)
       setModalDesc('GitHub Actions CI pipeline for install, test, and build.')
       setModalContent(generateCI(repoName))
       setModalFilename('.github/workflows/ci.yml')
@@ -140,12 +176,13 @@ export function ReportView() {
   }
 
   const handleAutoPR = async () => {
+    const { owner, repoName } = getOwnerRepo(modalRepo)
     if (!currentAction || !owner || !repoName) return
     try {
       setAutoPRSubmitting(true)
       setAutoPRStatusText(undefined)
       setAutoPRStatusType(undefined)
-      const language = selectedRepo?.language || 'JavaScript'
+      const language = modalRepo?.language || 'JavaScript'
       const res = await fetch('/api/apply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -169,6 +206,82 @@ export function ReportView() {
     } finally {
       setAutoPRSubmitting(false)
     }
+  }
+
+  // Start deep analysis for top 3 repos
+  const handleStartDeepAnalysis = async () => {
+    if (isDeepAnalyzing || repos.length === 0) return
+
+    // Check if API key is set - if not, prompt user to add one
+    if (!geminiApiKey) {
+      setShowApiKeyModal(true)
+      return
+    }
+
+    // Rank repos by importance and get top 3
+    const rankedRepos = rankReposByImportance(repos, role || 'Fullstack', 3)
+    const reposToAnalyze = rankedRepos.map(r => r.repo)
+
+    console.log('[ReportView] Starting deep analysis for:', reposToAnalyze.map(r => r.name))
+
+    setIsDeepAnalyzing(true)
+    setDeepAnalysisProgress({ current: 0, total: reposToAnalyze.length, currentRepo: null })
+
+    for (let i = 0; i < reposToAnalyze.length; i++) {
+      const repo = reposToAnalyze[i]
+      const [owner, repoName] = repo.full_name.split('/')
+
+      setDeepAnalysisProgress({
+        current: i,
+        total: reposToAnalyze.length,
+        currentRepo: repo.name
+      })
+
+      try {
+        const res = await fetch('/api/analyze/deep', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            owner,
+            repo: repoName,
+            role: role || 'Fullstack',
+            seniority: seniority || 'Junior',
+            description: repo.description,
+            geminiApiKey  // Pass user's API key
+          })
+        })
+
+        if (res.ok) {
+          const data = await res.json()
+          setDeepAnalysisResult(repo.name, {
+            repo_name: repo.name,
+            ...data.analysis,
+            files_analyzed: data.files_analyzed,
+            total_files: data.total_files
+          })
+        } else {
+          console.error(`[ReportView] Deep analysis failed for ${repo.name}`)
+        }
+      } catch (error) {
+        console.error(`[ReportView] Deep analysis error for ${repo.name}:`, error)
+      }
+    }
+
+    setDeepAnalysisProgress({
+      current: reposToAnalyze.length,
+      total: reposToAnalyze.length,
+      currentRepo: null
+    })
+    setIsDeepAnalyzing(false)
+  }
+
+  // Handle API key set from modal - then start deep analysis
+  const handleApiKeySet = (key: string) => {
+    saveGeminiKey(key)
+    // Trigger deep analysis after key is saved
+    setTimeout(() => {
+      handleStartDeepAnalysis()
+    }, 100)
   }
 
   return (
@@ -210,16 +323,20 @@ export function ReportView() {
               </div>
             </Card>
 
-            {selectedRepo && (
-              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
-                <Button variant="outline" onClick={() => openModalFor('readme')}>Generate README</Button>
-                <Button variant="outline" onClick={() => openModalFor('tests')}>Generate Tests</Button>
-                <Button variant="outline" onClick={() => openModalFor('ci')}>Generate CI</Button>
-                <div className="sm:ml-auto mt-2 sm:mt-0 text-sm text-muted-foreground flex items-center">
-                  {isGhAuthenticated ? 'GitHub: Signed in' : 'GitHub: Not authenticated'}
-                </div>
-              </div>
-            )}
+            {/* Auth status indicators */}
+            <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground">
+              {/* Gemini API Key Status */}
+              <ApiKeyStatus
+                hasKey={hasGeminiKey}
+                onManage={() => hasGeminiKey ? setShowApiKeyManageModal(true) : setShowApiKeyModal(true)}
+              />
+
+              {/* GitHub Auth Status */}
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${isGhAuthenticated ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
+                <span className={`w-2 h-2 rounded-full ${isGhAuthenticated ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                {isGhAuthenticated ? 'GitHub Connected' : 'GitHub: Not authenticated'}
+              </span>
+            </div>
 
             {/* Signal Strength */}
             <section>
@@ -231,21 +348,24 @@ export function ReportView() {
                     return (
                       <Card key={index} className="p-5">
                         <h3 className="text-sm font-semibold text-muted-foreground mb-4">{signal.title}</h3>
-                        <div className="flex gap-1 h-8 items-end">
+                        <div className="flex gap-1 h-20 items-end">
                           {Array.from({ length: signal.max || 5 }).map((_, i) => (
                             <div
                               key={i}
-                              className={`flex-1 rounded-sm opacity-0 transform scale-y-0 origin-bottom animate-barRaise ${
-                                i < signal.value
-                                  ? 'bg-gradient-to-t from-green-600 to-green-400'
-                                  : 'bg-border'
-                              }`}
+                              className={`flex-1 rounded-sm origin-bottom animate-barRaise ${i < signal.value
+                                ? 'bg-gradient-to-t from-green-600 to-green-400'
+                                : 'bg-border'
+                                }`}
                               style={{
                                 animationDelay: `${i * 100}ms`,
                                 height: `${((i + 1) / (signal.max || 5)) * 100}%`,
                               }}
                             />
                           ))}
+                        </div>
+                        <div className="mt-3 text-center">
+                          <span className="text-2xl font-bold text-foreground">{signal.value}</span>
+                          <span className="text-sm text-muted-foreground">/{signal.max || 5}</span>
                         </div>
                       </Card>
                     )
@@ -256,39 +376,58 @@ export function ReportView() {
               </div>
             </section>
 
+            {/* Repository Health - Shows which repos need what */}
+            <RepositoryHealthSection
+              repos={repos}
+              onGenerateReadme={(repo) => openModalFor('readme', repo)}
+              onGenerateTests={(repo) => openModalFor('tests', repo)}
+              onGenerateCI={(repo) => openModalFor('ci', repo)}
+            />
+
+            {/* Deep Analysis - Code-level review of top projects */}
+            <DeepAnalysisSection
+              repos={repos}
+              deepAnalysisResults={deepAnalysisResults}
+              isDeepAnalyzing={isDeepAnalyzing}
+              deepAnalysisProgress={deepAnalysisProgress}
+              onStartDeepAnalysis={handleStartDeepAnalysis}
+              onGenerateForRepo={(repo, action) => openModalFor(action, repo)}
+            />
+
             {/* Issues (if any) */}
-              {analysisResult.issues && analysisResult.issues.length > 0 && (
-                <section>
-                  <h2 className="text-2xl font-bold mb-5">What&apos;s Holding You Back</h2>
-                  <div className="space-y-4">
-                    {analysisResult.issues.map((issue, index) => {
-                      console.log('[ReportView] Rendering issue:', issue)
-                      return (
-                        <Card key={index} className="p-6">
-                          <div className="flex flex-col sm:flex-row items-start gap-4">
-                            <div className="text-3xl">⚠️</div>
-                            <div className="flex-1">
-                              <h3 className="text-lg font-semibold mb-2">{issue.title}</h3>
-                              <p className="text-sm text-muted-foreground mb-3">
-                                <strong>Evidence:</strong> {issue.evidence}
-                              </p>
-                              <p className="text-sm mb-3">{issue.why}</p>
-                              <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
-                                <span className="text-xs font-medium text-muted-foreground">
-                                  Confidence: {issue.confidence}
-                                </span>
-                                <Button variant="outline" size="sm">
-                                  {issue.fix} →
-                                </Button>
-                              </div>
+            {analysisResult.issues && analysisResult.issues.length > 0 && (
+              <section>
+                <h2 className="text-2xl font-bold mb-5">What&apos;s Holding You Back</h2>
+                <div className="space-y-4">
+                  {analysisResult.issues.map((issue, index) => {
+                    console.log('[ReportView] Rendering issue:', issue)
+                    return (
+                      <Card key={index} className="p-6 border-l-4 border-l-yellow-500">
+                        <div className="flex flex-col sm:flex-row items-start gap-4">
+                          <div className="text-4xl" role="img" aria-label="Warning">⚠️</div>
+                          <div className="flex-1 space-y-4">
+                            <h3 className="text-xl font-bold text-foreground">{issue.title}</h3>
+                            <div className="bg-muted/50 p-4 rounded-md border border-border">
+                              <p className="text-sm font-medium text-muted-foreground mb-1">Evidence:</p>
+                              <p className="text-sm text-foreground leading-relaxed">{issue.evidence}</p>
+                            </div>
+                            <p className="text-base text-foreground leading-relaxed">{issue.why}</p>
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2">
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
+                                Confidence: {issue.confidence}
+                              </span>
+                              <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700">
+                                {issue.fix} →
+                              </Button>
                             </div>
                           </div>
-                        </Card>
-                      )
-                    })}
-                  </div>
-                </section>
-              )}
+                        </div>
+                      </Card>
+                    )
+                  })}
+                </div>
+              </section>
+            )}
 
             {/* Action Plan */}
             <section>
@@ -412,13 +551,31 @@ export function ReportView() {
         description={modalDesc}
         content={modalContent}
         filename={modalFilename}
-        onAutoPR={selectedRepo ? handleAutoPR : undefined}
+        onAutoPR={modalRepo ? handleAutoPR : undefined}
         autoPRLabel={currentAction ? `Auto-PR ${currentAction.toUpperCase()}` : undefined}
         isSubmitting={autoPRSubmitting}
         statusText={autoPRStatusText}
         statusType={autoPRStatusType}
         onAuth={autoPRStatusType === 'error' ? handleAuth : undefined}
         authLabel={'Authenticate with GitHub'}
+      />
+      {/* API Key Modals */}
+      <ApiKeyModal
+        isOpen={showApiKeyModal}
+        onClose={() => setShowApiKeyModal(false)}
+        onKeySet={(key) => {
+          handleApiKeySet(key)
+        }}
+      />
+
+      <ApiKeyManageModal
+        isOpen={showApiKeyManageModal}
+        onClose={() => setShowApiKeyManageModal(false)}
+        onClear={clearGeminiKey}
+        onUpdate={() => {
+          setShowApiKeyManageModal(false)
+          setShowApiKeyModal(true)
+        }}
       />
     </>
   )
