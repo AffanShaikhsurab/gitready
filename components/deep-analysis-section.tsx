@@ -122,7 +122,7 @@ function RepoAnalysisCard({
                     {/* Quality Signals */}
                     <div>
                         <h4 className="text-sm font-semibold text-foreground mb-3">Code Quality Signals</h4>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <QualityBar label="Structure" value={analysis.code_quality_signals.structure} />
                             <QualityBar label="Documentation" value={analysis.code_quality_signals.documentation} />
                             <QualityBar label="Testing" value={analysis.code_quality_signals.testing} />
@@ -250,8 +250,8 @@ export function DeepAnalysisSection({
 
     return (
         <section>
-            <div className="flex items-center justify-between mb-5">
-                <h2 className="text-2xl font-bold">🔬 Deep Project Analysis</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+                <h2 className="text-xl sm:text-2xl font-bold">🔬 Deep Project Analysis</h2>
 
                 {!hasResults && !isDeepAnalyzing && (
                     <Button

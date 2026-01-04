@@ -20,30 +20,30 @@ export function LandingView({ onAnalyze }: LandingViewProps) {
   // Extract username from GitHub URL or use as-is
   const extractUsername = (input: string): string => {
     const trimmed = input.trim()
-    
+
     // Check if it's a GitHub URL
     const urlPatterns = [
       /github\.com\/([^\/\?#]+)/i,  // https://github.com/username or http://github.com/username
       /^@?([a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)$/ // Direct username with optional @
     ]
-    
+
     for (const pattern of urlPatterns) {
       const match = trimmed.match(pattern)
       if (match) {
         return match[1].replace(/^@/, '') // Remove @ if present
       }
     }
-    
+
     return trimmed.replace(/^@/, '') // Fallback: just remove @ if present
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!username.trim()) return
-    
+
     const cleanUsername = extractUsername(username)
     if (!cleanUsername) return
-    
+
     setIsLoading(true)
     await onAnalyze(cleanUsername, role, seniority)
     setIsLoading(false)
@@ -52,16 +52,16 @@ export function LandingView({ onAnalyze }: LandingViewProps) {
   return (
     <>
       {/* Header */}
-      <header className="absolute top-0 left-0 right-0 w-full max-w-[1200px] mx-auto flex items-center px-6 py-6">
+      <header className="absolute top-0 left-0 right-0 w-full max-w-[1200px] mx-auto flex items-center px-4 sm:px-6 py-4 sm:py-6 z-10">
         <Image
           src="/ic_launcher-web.png"
           alt="GitReady"
           width={32}
           height={32}
           unoptimized
-          className="mr-4 rounded"
+          className="mr-4 rounded flex-shrink-0"
         />
-        <nav className="flex gap-6">
+        <nav className="hidden md:flex gap-6">
           <a href="#" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
             About
           </a>
@@ -73,28 +73,28 @@ export function LandingView({ onAnalyze }: LandingViewProps) {
           href="https://github.com/yourusername/gitready"
           target="_blank"
           rel="noopener noreferrer"
-          className="ml-auto flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-secondary hover:bg-secondary/80 transition-all"
+          className="ml-auto flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border border-border bg-secondary hover:bg-secondary/80 transition-all text-sm sm:text-base flex-shrink-0"
         >
           <Github className="w-4 h-4" />
-          Source
+          <span className="hidden sm:inline">Source</span>
         </a>
       </header>
 
       {/* Main Content */}
-      <main className="flex flex-col items-center justify-center min-h-screen px-6">
+      <main className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 pt-20 sm:pt-16">
         <div className="max-w-[680px] w-full text-center animate-fadeIn">
-          <h1 className="relative text-5xl md:text-6xl font-extrabold leading-tight mb-4">
+          <h1 className="relative text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4">
             Is your GitHub portfolio optimized?
             <Image
               src="/investigator.png"
               alt="Investigator"
               width={160}
               height={160}
-              className="absolute right-0 top-1/2 -translate-y-1/2 -z-10 pointer-events-none"
+              className="absolute right-0 top-1/2 -translate-y-1/2 -z-10 pointer-events-none hidden md:block md:w-[120px] lg:w-[160px]"
               style={{ transform: 'rotate(20deg)' }}
             />
           </h1>
-          <p className="text-lg text-muted-foreground max-w-[580px] mx-auto leading-relaxed mb-10">
+          <p className="text-base sm:text-lg text-muted-foreground max-w-[580px] mx-auto leading-relaxed mb-6 sm:mb-10">
             See your profile through an employer&apos;s eyes. Our AI will analyze your commits, repos, and activity against{' '}
             <strong className="text-foreground font-semibold">real job specs</strong> to find where you shine, and what to build next.
           </p>

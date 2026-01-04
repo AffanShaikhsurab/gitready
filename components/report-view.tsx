@@ -324,7 +324,7 @@ export function ReportView() {
             </Card>
 
             {/* Auth status indicators */}
-            <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
               {/* Gemini API Key Status */}
               <ApiKeyStatus
                 hasKey={hasGeminiKey}
@@ -340,8 +340,8 @@ export function ReportView() {
 
             {/* Signal Strength */}
             <section>
-              <h2 className="text-2xl font-bold mb-5">Your Signal Strength</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-5">Your Signal Strength</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                 {analysisResult.signals && analysisResult.signals.length > 0 ? (
                   analysisResult.signals.map((signal, index) => {
                     console.log('[ReportView] Rendering signal:', signal)
@@ -394,105 +394,143 @@ export function ReportView() {
               onGenerateForRepo={(repo, action) => openModalFor(action, repo)}
             />
 
-            {/* Issues (if any) */}
-            {analysisResult.issues && analysisResult.issues.length > 0 && (
-              <section>
-                <h2 className="text-2xl font-bold mb-5">What&apos;s Holding You Back</h2>
-                <div className="space-y-4">
-                  {analysisResult.issues.map((issue, index) => {
-                    console.log('[ReportView] Rendering issue:', issue)
-                    return (
-                      <Card key={index} className="p-6 border-l-4 border-l-yellow-500">
-                        <div className="flex flex-col sm:flex-row items-start gap-4">
-                          <div className="text-4xl" role="img" aria-label="Warning">⚠️</div>
-                          <div className="flex-1 space-y-4">
-                            <h3 className="text-xl font-bold text-foreground">{issue.title}</h3>
-                            <div className="bg-muted/50 p-4 rounded-md border border-border">
-                              <p className="text-sm font-medium text-muted-foreground mb-1">Evidence:</p>
-                              <p className="text-sm text-foreground leading-relaxed">{issue.evidence}</p>
-                            </div>
-                            <p className="text-base text-foreground leading-relaxed">{issue.why}</p>
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2">
-                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
-                                Confidence: {issue.confidence}
-                              </span>
-                              <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700">
-                                {issue.fix} →
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </Card>
-                    )
-                  })}
-                </div>
-              </section>
-            )}
-
-            {/* Action Plan */}
+            {/* 3 PRs to 3x Your Interview Rate - Actual Repos */}
             <section>
-              <h2 className="text-2xl font-bold mb-5">3 PRs to 3x Your Interview Rate</h2>
-              <div className="space-y-6">
-                {analysisResult.actions && analysisResult.actions.length > 0 ? (
-                  analysisResult.actions.map((action, index) => {
-                    console.log('[ReportView] Rendering action:', action)
+              <h2 className="text-xl sm:text-2xl font-bold mb-2">3 PRs to 3x Your Interview Rate</h2>
+              <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-5">Quick wins on your actual repos that will make the biggest difference to recruiters.</p>
+              <div className="space-y-4">
+                {(() => {
+                  // Build prioritized list of actionable repos
+                  const actionableRepos: Array<{
+                    repo: GitHubRepo
+                    action: 'readme' | 'tests' | 'ci'
+                    title: string
+                    description: string
+                    effort: string
+                    icon: string
+                  }> = []
+
+                  // Priority 1: Repos without README (most impactful)
+                  repos.filter(r => !r.has_readme).slice(0, 3).forEach(repo => {
+                    if (actionableRepos.length < 3) {
+                      actionableRepos.push({
+                        repo,
+                        action: 'readme',
+                        title: `Add README to ${repo.name}`,
+                        description: `Your ${repo.language || 'project'} repo has no documentation. A good README is the #1 thing recruiters check.`,
+                        effort: '☕ 15 min',
+                        icon: '📝'
+                      })
+                    }
+                  })
+
+                  // Priority 2: Repos without tests
+                  repos.filter(r => !r.has_tests && r.has_readme).slice(0, 3).forEach(repo => {
+                    if (actionableRepos.length < 3) {
+                      actionableRepos.push({
+                        repo,
+                        action: 'tests',
+                        title: `Add tests to ${repo.name}`,
+                        description: `Show you write tested code. Even 2-3 test cases for ${repo.name} signals professionalism.`,
+                        effort: '☕☕ 30 min',
+                        icon: '✅'
+                      })
+                    }
+                  })
+
+                  // Priority 3: Repos without CI
+                  repos.filter(r => !r.has_ci && r.has_readme && r.has_tests).slice(0, 3).forEach(repo => {
+                    if (actionableRepos.length < 3) {
+                      actionableRepos.push({
+                        repo,
+                        action: 'ci',
+                        title: `Add CI/CD to ${repo.name}`,
+                        description: `${repo.name} has tests but no automation. A GitHub Actions workflow shows DevOps awareness.`,
+                        effort: '☕ 15 min',
+                        icon: '🚀'
+                      })
+                    }
+                  })
+
+                  if (actionableRepos.length === 0) {
                     return (
-                      <Card
-                        key={index}
-                        className="p-6 flex flex-col md:flex-row gap-6 items-start hover:-translate-y-1 hover:border-blue-500 transition-all duration-200"
-                      >
-                        <div className="text-2xl font-bold text-muted-foreground mt-1">{action.number}</div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold mb-2">{action.title}</h3>
-                          <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                            {action.description}
-                          </p>
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                            <span className="text-sm font-medium text-muted-foreground">
-                              Effort: {action.effort}
-                            </span>
-                            <Button variant="secondary" size="sm" asChild>
-                              <a href={action.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                                Take Action <ExternalLink className="w-3 h-3" />
-                              </a>
-                            </Button>
-                          </div>
-                        </div>
+                      <Card className="p-6 text-center border-green-500/30 bg-green-500/5">
+                        <div className="text-4xl mb-3">🎉</div>
+                        <h3 className="text-lg font-semibold text-green-400">You're All Set!</h3>
+                        <p className="text-sm text-muted-foreground mt-2">All your repos have README, tests, and CI. Great job!</p>
                       </Card>
                     )
-                  })
-                ) : (
-                  <p className="text-muted-foreground">No actions available</p>
-                )}
+                  }
+
+                  return actionableRepos.map((item, index) => (
+                    <Card
+                      key={`${item.repo.id}-${item.action}`}
+                      className="p-4 sm:p-5 flex flex-col sm:flex-row gap-3 sm:gap-4 items-start hover:-translate-y-1 hover:border-blue-500 transition-all duration-200"
+                    >
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <span className="text-xl sm:text-2xl font-bold text-muted-foreground">{String(index + 1).padStart(2, '0')}</span>
+                        <span className="text-xl sm:text-2xl">{item.icon}</span>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold mb-1">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+                          {item.description}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                          <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded">
+                            {item.effort}
+                          </span>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700"
+                            onClick={() => openModalFor(item.action, item.repo)}
+                          >
+                            Generate & PR →
+                          </Button>
+                          <Button variant="ghost" size="sm" asChild>
+                            <a href={item.repo.html_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
+                              View Repo <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))
+                })()}
               </div>
             </section>
           </main>
 
           {/* Sidebar */}
-          <aside className="animate-fadeIn" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
+          <aside className="animate-fadeIn lg:sticky lg:top-6 lg:self-start" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
             {/* Profile Card */}
-            <Card className="p-5 text-center">
-              <Image
-                src={userData.avatar_url}
-                alt={userData.login}
-                width={64}
-                height={64}
-                className="rounded-full mx-auto mb-4"
-              />
-              <h3 className="text-lg font-semibold">{userData.name || userData.login}</h3>
-              <p className="text-sm text-muted-foreground mb-4">@{userData.login}</p>
-              <div className="flex justify-around text-sm text-muted-foreground">
-                <div>
-                  <strong className="block text-base font-semibold text-foreground">
-                    {analysisResult.topLanguage}
-                  </strong>
-                  <span>Top Language</span>
-                </div>
-                <div>
-                  <strong className="block text-base font-semibold text-foreground">
-                    {userData.followers}
-                  </strong>
-                  <span>Followers</span>
+            <Card className="p-4 sm:p-5 text-center">
+              <div className="flex flex-row sm:flex-col items-center sm:items-center gap-4 sm:gap-0">
+                <Image
+                  src={userData.avatar_url}
+                  alt={userData.login}
+                  width={64}
+                  height={64}
+                  className="rounded-full w-12 h-12 sm:w-16 sm:h-16 sm:mx-auto sm:mb-4 flex-shrink-0"
+                />
+                <div className="flex-1 sm:w-full">
+                  <h3 className="text-base sm:text-lg font-semibold text-left sm:text-center">{userData.name || userData.login}</h3>
+                  <p className="text-sm text-muted-foreground sm:mb-4 text-left sm:text-center">@{userData.login}</p>
+                  <div className="hidden sm:flex justify-around text-sm text-muted-foreground">
+                    <div>
+                      <strong className="block text-base font-semibold text-foreground">
+                        {analysisResult.topLanguage}
+                      </strong>
+                      <span>Top Language</span>
+                    </div>
+                    <div>
+                      <strong className="block text-base font-semibold text-foreground">
+                        {userData.followers}
+                      </strong>
+                      <span>Followers</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </Card>

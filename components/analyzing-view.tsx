@@ -130,10 +130,13 @@ export function AnalyzingView({ loadingJoke }: AnalyzingViewProps) {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 24px;
+          padding: 16px;
           font-family: 'Inter', sans-serif;
           opacity: 0;
           transition: opacity 0.3s ease;
+        }
+        @media (min-width: 640px) {
+          .loading-overlay { padding: 24px; }
         }
         .loading-overlay.visible { opacity: 1; }
 
@@ -142,10 +145,13 @@ export function AnalyzingView({ loadingJoke }: AnalyzingViewProps) {
           max-width: 680px;
           background-color: var(--card-bg);
           border: 1px solid var(--border-color);
-          border-radius: 12px;
+          border-radius: 8px;
           box-shadow: 0 10px 30px rgba(0,0,0,0.3);
           overflow: hidden;
           animation: fadeInTerminal 0.5s ease-out forwards;
+        }
+        @media (min-width: 640px) {
+          .terminal-window { border-radius: 12px; }
         }
         @keyframes fadeInTerminal {
           from { opacity: 0; transform: scale(0.95); }
@@ -153,21 +159,36 @@ export function AnalyzingView({ loadingJoke }: AnalyzingViewProps) {
         }
 
         .terminal-header {
-          padding: 12px 16px;
+          padding: 10px 12px;
           background-color: #161b22;
           border-bottom: 1px solid var(--border-color);
           font-family: 'JetBrains Mono', monospace;
-          font-size: 13px;
+          font-size: 11px;
           color: var(--text-secondary);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        @media (min-width: 640px) {
+          .terminal-header { padding: 12px 16px; font-size: 13px; }
         }
 
         .terminal-body {
-          padding: 32px;
+          padding: 20px 16px;
           text-align: center;
         }
+        @media (min-width: 640px) {
+          .terminal-body { padding: 32px; }
+        }
 
-        .spinner-container { margin-bottom: 24px; }
-        .spinner { width: 48px; height: 48px; animation: spin 1s linear infinite; }
+        .spinner-container { margin-bottom: 16px; }
+        @media (min-width: 640px) {
+          .spinner-container { margin-bottom: 24px; }
+        }
+        .spinner { width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @media (min-width: 640px) {
+          .spinner { width: 48px; height: 48px; }
+        }
         .spinner circle {
           stroke: var(--green-text);
           stroke-width: 4;
@@ -179,24 +200,37 @@ export function AnalyzingView({ loadingJoke }: AnalyzingViewProps) {
         @keyframes spin { to { transform: rotate(360deg); } }
 
         .main-status {
-          font-size: 20px;
+          font-size: 16px;
           font-weight: 600;
           color: var(--text-primary);
-          margin-bottom: 8px;
+          margin-bottom: 6px;
+          word-break: break-word;
+        }
+        @media (min-width: 640px) {
+          .main-status { font-size: 20px; margin-bottom: 8px; }
         }
         .sub-status {
           font-family: 'JetBrains Mono', monospace;
-          font-size: 14px;
+          font-size: 11px;
           color: var(--text-secondary);
-          margin-bottom: 16px;
-          min-height: 20px;
+          margin-bottom: 12px;
+          min-height: 16px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        @media (min-width: 640px) {
+          .sub-status { font-size: 14px; margin-bottom: 16px; min-height: 20px; white-space: normal; }
         }
         .funny-status {
-          font-size: 14px;
+          font-size: 12px;
           color: var(--text-secondary);
           font-style: italic;
-          margin-bottom: 24px;
-          min-height: 20px;
+          margin-bottom: 16px;
+          min-height: 16px;
+        }
+        @media (min-width: 640px) {
+          .funny-status { font-size: 14px; margin-bottom: 24px; min-height: 20px; }
         }
 
         .step-list {
@@ -204,23 +238,32 @@ export function AnalyzingView({ loadingJoke }: AnalyzingViewProps) {
           text-align: left;
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 8px;
+        }
+        @media (min-width: 640px) {
+          .step-list { gap: 12px; }
         }
         .step-list li {
           display: flex;
-          align-items: center;
-          gap: 12px;
-          font-size: 14px;
+          align-items: flex-start;
+          gap: 8px;
+          font-size: 12px;
           color: var(--text-secondary);
           opacity: 0;
           transform: translateY(5px);
           animation: fadeInStep 0.4s ease-out forwards;
         }
+        @media (min-width: 640px) {
+          .step-list li { gap: 12px; font-size: 14px; align-items: center; }
+        }
         @keyframes fadeInStep {
           to { opacity: 1; transform: translateY(0); }
         }
 
-        .step-icon { width: 16px; height: 16px; color: var(--green-text); }
+        .step-icon { width: 14px; height: 14px; color: var(--green-text); flex-shrink: 0; margin-top: 2px; }
+        @media (min-width: 640px) {
+          .step-icon { width: 16px; height: 16px; margin-top: 0; }
+        }
         .checkmark-path {
           stroke-dasharray: 24;
           stroke-dashoffset: 24;
